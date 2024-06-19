@@ -1,7 +1,9 @@
 from django.urls import path
-from .views import main
+from . import views
 
 urlpatterns = [
     #cada vez que llegue un request para una pagina vacia ("") va a redirigir a pagina main
-    path("", main)
+    path("", views.index, name = "index"),
+    path("staff/", views.staff, name = "staff")
+    
 ]
