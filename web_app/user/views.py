@@ -15,7 +15,7 @@ def register(request):
     else:
         form = CreateUserForm()
     context = {
-        'form': form
+        "form": form
     }
     return render(request, 'user/register.html', context)
 

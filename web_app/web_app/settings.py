@@ -142,3 +142,7 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = (BASE_DIR/"assert/")
+
+LOGIN_REDIRECT_URL ="api-index"
+
+LOGOUT_REDIRECT_URL = "user-logout"

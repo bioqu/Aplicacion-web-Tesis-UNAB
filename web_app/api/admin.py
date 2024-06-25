@@ -7,7 +7,7 @@ admin.site.site_header = "Dashboard Bodegas RF"
 
 class ProductAdmin(admin.ModelAdmin):
     list_display = ("name", "category", "quantity")
-    list_filter = ("category", "quantity")
+    list_filter = ["category"]
 
 # Register your models here.
 admin.site.register(Product, ProductAdmin)
