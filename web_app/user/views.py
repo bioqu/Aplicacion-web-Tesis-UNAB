@@ -11,11 +11,11 @@ def register(request):
             #user = 
             #group = Group.objects.get(name='Customers')
             #user.groups.add(group)
-            return redirect("api-index")
+            return redirect("user-login")
     else:
         form = CreateUserForm()
     context = {
         "form": form
     }
-    return render(request, 'user/register.html', context)
+    return render(request, 'user/login.html', context)
 
