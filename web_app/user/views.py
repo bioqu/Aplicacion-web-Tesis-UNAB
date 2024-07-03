@@ -19,3 +19,6 @@ def register(request):
     }
     return render(request, 'user/login.html', context)
 
+def perfil(request):
+    return render(request, "user/perfil.html")
+

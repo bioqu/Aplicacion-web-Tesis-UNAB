@@ -1,0 +1,54 @@
+{% extends 'partials/base.html' %}
+{% block title %}Perfil{% endblock %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container">
+    
+
+<div class="row my-4">
+    <div class="col-md-4">
+
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                Informacion
+            </div>
+            <div class="row p-3">
+                <div class="col-md-8">
+                    <table class="table table-borderless">
+                        <thead>
+                            <span class="h4">Informacion del Perfil</span class="h4">
+                            <hr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th>Nombre</th>
+                                <td>{{ user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Telefono</th>
+                                <td>{{ user.perfil.Telefono }}</td>
+                            </tr>
+                            <tr>
+                                <th>Direccion</th>
+                                <td>{{ user.perfil.Direccion }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4">
+                    <img class="img-thumbnail" src="{{ user.perfil.Imagen.url }}" alt="profile-image">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</div>
+{% endblock %}

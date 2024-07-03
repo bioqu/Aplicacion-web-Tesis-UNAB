@@ -143,6 +143,12 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = (BASE_DIR/"assert/")
 
+MEDIA_ROOT = (BASE_DIR/"media/")
+
+MEDIA_URL = "/media/"
+
 LOGIN_REDIRECT_URL ="api-index"
+
+LOGIN_URL ="user-login"
 
 LOGOUT_REDIRECT_URL = "user-logout"
