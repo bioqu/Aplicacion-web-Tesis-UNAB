@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "dashboard.apps.DashboardConfig",
     #user app
     "user.apps.UserConfig",
+    #blockchain app
+    "block.apps.BlockConfig"
 ]
 
 #para solucionar crispy_template error
@@ -143,6 +145,7 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = (BASE_DIR/"assert/")
 
+#folder para imagenes (media)
 MEDIA_ROOT = (BASE_DIR/"media/")
 
 MEDIA_URL = "/media/"
