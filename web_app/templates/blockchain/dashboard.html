@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Blockchain Dashboard</title>
+    <style>
+        .block-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .block p {
+            margin: 5px 0;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }             
+        .block p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}
+    {% include 'partials/nav.html'%}
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">Blockchain Dashboard</div>
+            <div class="card-body">
+            <form method="get" action="{% url 'blockchain_dashboard' %}">
+                <label for="producto_id">Selecciona el ID del Producto:</label>
+                <select id="producto_id" name="producto_id">
+                    <option value=""> Seleccionar </option>
+                    {% for id in all_ids %}
+                    <option value="{{ id }}">{{ id }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit">Filtrar</button>
+            </form>
+       
+            <div class="block-container">
+                {% for block in blocks %}
+                <div class="block">
+                    <p>ID: {{ block.producto_id }}</p>
+                    <p>Nombre: {{ block.nombre }}</p>
+                    <p>Cantidad: {{ block.cantidad }}</p>
+                    <p>Stock: {{ block.stock }}</p>
+                    <p>Hash: {{ block.hash }}</p>
+                    <p>Prev Hash: {{ block.prev_hash }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+<div class="container mt-3">
+<div class="mx-auto " style="width: 200px;">
+<a href="{% url 'block-index' %}" class="btn btn-primary">
+    Crear un nuevo bloque</a></div>
+</div>
+{% endblock%}
+</body>
+</html>

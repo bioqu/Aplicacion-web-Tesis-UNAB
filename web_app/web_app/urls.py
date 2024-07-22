@@ -30,4 +30,5 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(template_name="user/logout.html"), name= "user-logout"),
     path("perfil/", user_view.perfil, name="user-perfil"),
     path("perfil/update", user_view.perfil_update, name="user-perfil-update"),
+    path('blockchain/', include('blockchain.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
