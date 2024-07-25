@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     "user.apps.UserConfig",
     #blockchain app
     "blockchain",
+    #ganache
+    "ganache_blockchain"
 ]
 
 #para solucionar crispy_template error
