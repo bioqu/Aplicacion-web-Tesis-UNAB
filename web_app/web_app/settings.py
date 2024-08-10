@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     #blockchain app
     "blockchain",
     #ganache
-    "ganache_blockchain"
+    #"ganache_blockchain"
 ]
 
 #para solucionar crispy_template error

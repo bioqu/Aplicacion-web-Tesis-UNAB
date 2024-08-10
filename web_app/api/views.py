@@ -17,6 +17,11 @@ def staff(request):
 @login_required(login_url='user-login')
 def productos(request):
     # crear un "web" de entrada para productos
+    #items = Product.objects.all()
+    items = Product.objects.raw('SELECT * FROM api_productos')
+    context = {
+        'items': items,
+    }
     return render(request, "dashboard/productos.html")
 
 @login_required(login_url='user-login')

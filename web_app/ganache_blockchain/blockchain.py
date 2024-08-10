@@ -1,4 +1,4 @@
-# blockchain.py
+""" # blockchain.py
 from web3 import Web3
 from .config import GANACHE_URL, CONTRACT_ADDRESS, CONTRACT_ABI
 
@@ -20,3 +20,4 @@ except Exception as e:
 
 def get_contract():
     return contract
+ """
