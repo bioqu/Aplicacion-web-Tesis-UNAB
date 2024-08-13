@@ -7,6 +7,7 @@ urlpatterns = [
     path("staff/", views.staff, name = "api-staff"),
     path("productos/", views.productos, name = "api-productos"),
     path("ordenes/", views.ordenes, name = "api-ordenes"),
+    path("productos/delete/<int:pk>/", views.product_delete, name = "api-productos-delete"),
     
 ]
  

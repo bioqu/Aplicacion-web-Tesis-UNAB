@@ -7,21 +7,21 @@
 <div class="container">
 <div class="row my-4">
     <div class="col-md-4">
-        {% if messages %}
+        {% comment %} {% if messages %}
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}">
             {{ message }}
         </div>
         {% endfor %}
-        {% endif %}
-        <div class="card" style="width: 18rem;">
+        {% endif %} {% endcomment %}
+        <div class="card" style="width: 22rem;">
             <div class="card-body">
             <h5>Añadir nuevos productos</h5>
             <hr>
             <form method="POST">
                 {% csrf_token %}
-                {{ form|crispy }}
-                <input class="btn btn-success btn-block" type="submit" value="Add">
+                {{ form|crispy }}              
+                <input class="btn btn-success btn-block" type="submit" value="Añadir">
             </form>
         </div>
     </div>
@@ -38,16 +38,16 @@
                 </tr>
             </thead>
             <tbody>
-                {% for product in product %}
+                {% for item in items %}
                 <tr>
                     <td>{{ item.name }}</td>
                     <td>{{ item.category }}</td>
                     <td>{{ item.quantity }}</td>
                     <td>
-                        <a class="btn btn-info btn-sm mr-2"
-                            href="{% url 'dashboard-products-edit' product.id %}">Editar</a>
+                        {% comment %} <a class="btn btn-info btn-sm mr-2"
+                            href="{% url 'api-products-edit' product.id %}">Editar</a> {% endcomment %}
                         <a class="btn btn-danger btn-sm ml-2"
-                            href="{% url 'dashboard-products-delete' product.id %}">Eliminar</a>
+                            href="{% url 'api-productos-delete' item.id %}">Eliminar</a>
                     </td>
                 </tr>
                 {% endfor %}
