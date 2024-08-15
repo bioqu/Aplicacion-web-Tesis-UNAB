@@ -61,21 +61,7 @@ def get_chain(request):
     chain_data = [block.__dict__ for block in blch.chain[1:]]
     return JsonResponse(chain_data, safe=False, status=200)
 
-def index(request):
-    return render(request, 'blockchain/index.html')
-
-#vista para dashboard blockchain
-# def dashboard(request):
-#     producto_id = request.GET.get('producto_id')
-#     if producto_id:
-#         blocks = Block.objects.filter(producto_id=producto_id)
-#     else:
-#         blocks = Block.objects.none()  # No mostrar ningún bloque por defecto
-#     all_ids = Block.objects.values_list('producto_id', flat=True).distinct()  # Obtener todos los IDs únicos
-#     return render(request, 'blockchain/dashboard.html', {'blocks': blocks, 'all_ids': all_ids}) 
-
-# blockchain/views.py
-def blockchain_dashboard(request):
+def consulta(request):
     # Obtener solo los IDs únicos de los bloques
     all_ids = Block.objects.values_list('producto_id', flat=True).distinct()
     print(f"All IDs: {all_ids}")  # Agrega esta línea para depurar
@@ -94,4 +80,21 @@ def blockchain_dashboard(request):
         'blocks': blocks,
     }
 
-    return render(request, 'blockchain/dashboard.html', context)
+    return render(request, 'blockchain/consulta.html', context)
+
+def index(request):
+    return render(request, 'blockchain/index.html')
+
+#vista para dashboard blockchain
+# def dashboard(request):
+#     producto_id = request.GET.get('producto_id')
+#     if producto_id:
+#         blocks = Block.objects.filter(producto_id=producto_id)
+#     else:
+#         blocks = Block.objects.none()  # No mostrar ningún bloque por defecto
+#     all_ids = Block.objects.values_list('producto_id', flat=True).distinct()  # Obtener todos los IDs únicos
+#     return render(request, 'blockchain/dashboard.html', {'blocks': blocks, 'all_ids': all_ids}) 
+
+# blockchain/views.py
+def blockchain_dashboard(request):
+    return render(request, 'blockchain/dashboard.html')

@@ -6,4 +6,5 @@ urlpatterns = [
     path('add_block/', views.add_block, name='add_block'),
     path('get_chain/', views.get_chain, name='get_chain'),
     path('dashboard/', views.blockchain_dashboard, name='blockchain_dashboard'),  # Ruta para el dashboard
+    path('consulta/', views.consulta, name='blockchain_consulta'), 
 ]
