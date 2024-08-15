@@ -43,6 +43,22 @@ def product_delete(request, pk):
         return redirect("api-productos")
     return render(request, "dashboard/productos_delete.html")
 
+def product_update(request, pk):
+    item = Product.objects.get(id=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect('api-productos')
+
+    else:
+        form = ProductForm(instance=item)
+
+    context={
+        'form':form,
+    }
+    return render(request, "dashboard/productos_update.html", context)
+
 @login_required(login_url='user-login')
 def ordenes(request):
     # crear un "web" de entrada para ordenes
