@@ -5,6 +5,7 @@ from .models import Block
 from api.models import Product
 from api.forms import ProductForm
 from django.views.decorators.csrf import csrf_exempt
+from django.utils import timezone
 
 class Bloque:
     def __init__(self, producto_id, nombre, cantidad, stock, hash , prev_hash=''):
@@ -54,6 +55,8 @@ def add_block(request):
         nombre = data['nombre']
         cantidad = data['cantidad']
         stock = data['stock']
+        fecha = request.POST.get('fecha', timezone.now())  # Usa la fecha proporcionada o la fecha actual
+        cliente = request.POST.get('cliente')
         blch.add_block(producto_id, nombre, cantidad, stock)
         return JsonResponse({'message': 'Block added successfully', 'block': blch.chain[-1].__dict__}, status=200)
 
@@ -105,6 +108,7 @@ def index(request):
 
 def orden(request, pk):
     item = Product.objects.get(id=pk)
+
     if request.method == "POST":
         form = ProductForm(request.POST, instance=item)
         if form.is_valid():
@@ -115,6 +119,7 @@ def orden(request, pk):
         form = ProductForm(instance=item)
 
     context={
+        'item':item,
         'form':form,
     }
     return render(request, "blockchain/orden.html", context)

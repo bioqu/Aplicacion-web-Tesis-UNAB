@@ -1,6 +1,7 @@
 {% extends 'partials/base.html' %}
 {% load crispy_forms_tags %}
 {% block content %}
+{% include 'blockchain/top_nav_block.html' %}
 <div class="container mt-4">
         <div class="card">
             <div class="card-header bg-primary text-white">
@@ -10,16 +11,38 @@
                 <form id="orderForm" onsubmit="event.preventDefault(); generarOrden();">
                     <label for="producto_id">ID de la Orden:</label>
                     <input type="text" id="producto_id" name="producto_id" required><br>
-                    <label for="nombre">Nombre del Producto:</label>
-                    <input type="text" id="nombre" name="nombre"><br>
+
+                    {% comment %} <label for="nombre">Nombre del Producto:</label>
+                    <input type="text" id="nombre" name="nombre" value="{{ item.id }}" readonly><br> {% endcomment %}
+
+                    <label for="nombre" style="float: left; width: 180px;">Nombre del Producto:</label>
+                    <div id="nombre" style="float: left;">{{ item.name }}</div>
+                    <div style="clear: both;"></div> 
+                    <input type="hidden" id="nombre_hidden" name="nombre" value="{{ item.name }}"><br>
+
                     <label for="cantidad">Cantidad:</label>
                     <input type="number" id="cantidad" name="cantidad" required><br>
-                    <label for="stock">Stock:</label>
-                    <input type="number" id="stock" name="stock" required><br>
+                    
+                   {% comment %}  <label for="stock">Stock:</label>
+                    <input type="number" id="stock" name="stock" required><br> {% endcomment %}
+                    
+                    <label for="stock" style="float: left; width: 180px;">Stock:</label>
+                    <div id="stock" style="float: left;">{{ item.quantity }}</div>
+                    <div style="clear: both;"></div> 
+                    <input type="hidden" id="stock_hidden" name="stock" value="{{ item.quantity }}"><br>
+
+                    <label for="fecha">Fecha:</label>
+                    <input type="datetime-local" id="fecha" name="fecha" required><br>
+        
+                    <label for="cliente">Cliente:</label>
+                    <input type="text" id="cliente" name="cliente" required><br>
+
                     <button type="submit">Generar Orden</button>
                 </form>
             </div>
         </div>
+        
+
         <div class="card mt-4">
             <div class="card-header bg-primary text-white">Cadena de Bloques</div>
             <div class="card-body">
