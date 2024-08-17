@@ -1,7 +1,9 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import hashlib
 from .models import Block
+from api.models import Product
+from api.forms import ProductForm
 from django.views.decorators.csrf import csrf_exempt
 
 class Bloque:
@@ -83,7 +85,40 @@ def consulta(request):
     return render(request, 'blockchain/consulta.html', context)
 
 def index(request):
-    return render(request, 'blockchain/index.html')
+    items = Product.objects.all() #usando ORM 
+    #items = Product.objects.raw('SELECT * FROM api_product')
+
+    if request.method == "POST":
+        form = ProductForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("api-productos") 
+                         
+    else:
+        form = ProductForm()
+
+    context = {
+        'items': items,
+        'form': form,
+    }
+    return render(request, 'blockchain/index.html', context)
+
+def orden(request, pk):
+    item = Product.objects.get(id=pk)
+    if request.method == "POST":
+        form = ProductForm(request.POST, instance=item)
+        if form.is_valid():
+            form.save()
+            return redirect("blockchain-index")
+
+    else:
+        form = ProductForm(instance=item)
+
+    context={
+        'form':form,
+    }
+    return render(request, "blockchain/orden.html", context)
+
 
 #vista para dashboard blockchain
 # def dashboard(request):
@@ -98,3 +133,4 @@ def index(request):
 # blockchain/views.py
 def blockchain_dashboard(request):
     return render(request, 'blockchain/dashboard.html')
+

@@ -24,14 +24,14 @@
 <body>
     {% extends 'partials/base.html' %}
     {% block content %}
-   
+    {% include 'blockchain/top_nav_block.html' %}
     
     <div class="container mt-4">
         <div class="card">
             <div class="card-header bg-secondary text-white">Blockchain</div>
             <div class="card-body">
-            <form method="get" action="{% url 'blockchain_dashboard' %}">
-                <label for="producto_id">Selecciona el ID del Producto:</label>
+            <form method="get" action="{% url 'blockchain-consulta' %}">
+                <label for="producto_id">Selecciona el ID de la Orden:</label>
                 <select id="producto_id" name="producto_id">
                     <option value=""> Seleccionar </option>
                     {% for id in all_ids %}
@@ -57,10 +57,7 @@
     </div>
 <div class="container mt-3">
 <div class="mx-auto " style="width: 200px;">
-<a href="{% url 'block-index' %}" class="btn btn-secondary">
-    Crear un nuevo bloque</a>
-
-<a href="{% url 'blockchain_dashboard' %}" class="btn btn-secondary">
+<a href="{% url 'blockchain-dashboard' %}" class="btn btn-secondary">
         Dashboard</a>
     </div>
 </div>

@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from .models import Product, Order
 from django.contrib.auth.decorators import login_required
 from .forms import ProductForm
+from django.contrib.auth.models import User
 
 # Create your views here.
 @login_required(login_url='user-login')
@@ -13,7 +14,19 @@ def index(request):
 @login_required(login_url='user-login')
 def staff(request):
     # crear un "web" de entrada para staff
-    return render(request, "dashboard/staff.html")
+    workers = User.objects.all()
+    context={
+        'workers':workers
+    }
+    return render(request, "dashboard/staff.html", context)
+
+@login_required(login_url='user-login')
+def staff_detail(request, pk):
+    workers = User.objects.get(id=pk)
+    context={
+        'workers':workers,
+    }
+    return render(request, "dashboard/staff_detail.html", context)
 
 @login_required(login_url='user-login')
 def productos(request):
@@ -36,6 +49,7 @@ def productos(request):
     }
     return render(request, "dashboard/productos.html", context)
 
+@login_required(login_url='user-login')
 def product_delete(request, pk):
     item = Product.objects.get(id=pk)
     if request.method == "POST":
@@ -43,6 +57,7 @@ def product_delete(request, pk):
         return redirect("api-productos")
     return render(request, "dashboard/productos_delete.html")
 
+@login_required(login_url='user-login')
 def product_update(request, pk):
     item = Product.objects.get(id=pk)
     if request.method == "POST":
@@ -62,4 +77,9 @@ def product_update(request, pk):
 @login_required(login_url='user-login')
 def ordenes(request):
     # crear un "web" de entrada para ordenes
-    return render(request, "dashboard/ordenes.html")
+    orders = Order.objects.all()
+
+    context={
+        'orders':orders,
+    }
+    return render(request, "dashboard/ordenes.html", context)

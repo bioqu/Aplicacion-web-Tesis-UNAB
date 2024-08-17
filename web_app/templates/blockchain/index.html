@@ -25,74 +25,35 @@
     {% extends 'partials/base.html' %}
     {% load crispy_forms_tags %}
     {% block content %}
+    {% include 'blockchain/top_nav_block.html' %}
     <div class="container mt-4">
-        <div class="card">
-            <div class="card-header bg-primary text-white">
-                Generar Orden
-            </div>
-            <div class="card-body">
-                <form id="orderForm" onsubmit="event.preventDefault(); generarOrden();">
-                    <label for="producto_id">ID del Producto:</label>
-                    <input type="text" id="producto_id" name="producto_id" required><br>
-                    <label for="nombre">Nombre del Producto (opcional, se mantendrá igual):</label>
-                    <input type="text" id="nombre" name="nombre"><br>
-                    <label for="cantidad">Cantidad:</label>
-                    <input type="number" id="cantidad" name="cantidad" required><br>
-                    <label for="stock">Stock:</label>
-                    <input type="number" id="stock" name="stock" required><br>
-                    <button type="submit">Generar Orden</button>
-                </form>
-            </div>
-        </div>
-        <div class="card mt-4">
-            <div class="card-header bg-primary text-white">Cadena de Bloques</div>
-            <div class="card-body">
-                <div class="block-container" id="blockchainContainer">
-                    <!-- Los bloques serán añadidos aquí -->
-                </div>
-            </div>
-        </div>
+    <div class="col-md-auto">
+        <table class="table bg-white">
+            <thead class="bg-info text-white">
+                <tr>
+                    <th scope="col">Nombre</th>
+                    <th scope="col">Categoria</th>
+                    <th scope="col">Cantidad</th>
+                    <th scope="col">Acitividad</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.category }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>
+                        <a class="btn btn-info btn-sm mr-2"
+                            href="{% url "blockchain-orden" item.id %}">Crear Orden</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-    
-    <script>
-        async function generarOrden() {
-            const formData = new FormData(document.getElementById('orderForm'));
-
-            const response = await fetch('/blockchain/add_block/', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                actualizarCadena();
-            } else {
-                console.error('Error al agregar el bloque');
-            }
-        }
-
-        async function actualizarCadena() {
-            const response = await fetch('/blockchain/get_chain/');
-            const blocks = await response.json();
-
-            const container = document.getElementById('blockchainContainer');
-            container.innerHTML = ''; // Limpiar contenido previo
-
-            blocks.forEach(block => {
-                const blockElement = document.createElement('div');
-                blockElement.className = 'block';
-
-                for (const [key, value] of Object.entries(block)) {
-                    const p = document.createElement('p');
-                    p.textContent = `${key}: ${value}`;
-                    blockElement.appendChild(p);
-                }
-
-                container.appendChild(blockElement);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', actualizarCadena);
-    </script>
+</div>
+</div>
     {% endblock %}
 </body>
 </html>

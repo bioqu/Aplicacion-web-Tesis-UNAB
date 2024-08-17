@@ -1,0 +1,53 @@
+{% extends "partials/base.html" %}
+{% block title %} Pagina Staff{% endblock %}
+
+{% block content %}
+{% include 'partials/topnav.html'%}
+<div class="container">
+    <div class="row my-4">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-dark text-white">
+                    Perfil
+                </div>
+                <div class="row p-3">
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <thead>
+                                <span class="h4">Informacion del Perfil</span class="h4">
+                                <hr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <td>{{ workers.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td>{{ workers.email }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Telefono</th>
+                                    <td>{{ workers.perfil.Telefono }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Direccion</th>
+                                    <td>{{ workers.perfil.Direccion }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-md-4">
+                        <img class="img-thumbnail" src="{{ workers.perfil.Imagen.url }}" alt="profile-image">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    </div>
+
+
+
+{% endblock %}
