@@ -27,15 +27,20 @@
                                 <th scope="col">Productos</th>
                                 <th scope="col">Categorias</th>
                                 <th scope="col">Cantidad</th>
+                                <th scope="col">Ordenado por</th>
+                                <th scope="col">Fecha</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for order in order %}
-                            {% if order.customer == user %}
+                            {% for order in orders %}
+                            {% if order.staff == user %}
                             <tr>
-                                <td>{{ order.name }}</td>
-                                <td>{{ order.name.category }}</td>
+                                <td>{{ order.product.name }}</td>
+                                <td>{{ order.product.category }}</td>
                                 <td>{{ order.order_quantity }}</td>
+                                <td>{{ order.staff }}</td>
+                                <td>{{ order.date|date:"d M Y, H:i" }}</td>
+                                
                             </tr>
                             {% endif %}
                             {% endfor %}

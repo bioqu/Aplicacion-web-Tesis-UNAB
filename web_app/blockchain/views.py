@@ -8,11 +8,13 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
 class Bloque:
-    def __init__(self, producto_id, nombre, cantidad, stock, hash , prev_hash=''):
+    def __init__(self, producto_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash=''):
         self.producto_id = producto_id
         self.nombre = nombre
         self.cantidad = cantidad
         self.stock = stock
+        self.fecha = fecha
+        self.cliente = cliente
         self.hash = hash
         self.prev_hash = prev_hash
 
@@ -21,18 +23,18 @@ class MiBlock:
         hashLast = self.hashGenerator("las_gen")
         hashFirst = self.hashGenerator("first_gen")
 
-        genesis = Bloque("0", "genesis", 0, 0, hashFirst, hashLast)
+        genesis = Bloque("0", "genesis", 0, 0, 0, 0, hashFirst, hashLast)
         self.chain = [genesis]
     
     def hashGenerator(self, data):
         resultado = hashlib.sha256(data.encode())
         return resultado.hexdigest()
 
-    def add_block(self, producto_id, nombre, cantidad, stock):
+    def add_block(self, producto_id, nombre, cantidad, stock, fecha, cliente):
         prev_hash = self.chain[-1].hash
-        data = f"{producto_id}{nombre}{cantidad}{stock}"
+        data = f"{producto_id}{nombre}{cantidad}{stock}{fecha},{cliente}"
         hash = self.hashGenerator(data + prev_hash)
-        block = Bloque(producto_id, nombre, cantidad, stock, hash, prev_hash)
+        block = Bloque(producto_id, nombre, cantidad, stock, fecha, cliente, hash, prev_hash)
         self.chain.append(block)
         
         # Guardar en la base de datos
@@ -41,6 +43,8 @@ class MiBlock:
             nombre=nombre,
             cantidad=cantidad,
             stock=stock,
+            fecha = fecha,
+            cliente = cliente,
             hash=hash,
             prev_hash=prev_hash
         )
@@ -55,9 +59,9 @@ def add_block(request):
         nombre = data['nombre']
         cantidad = data['cantidad']
         stock = data['stock']
-        fecha = request.POST.get('fecha', timezone.now())  # Usa la fecha proporcionada o la fecha actual
-        cliente = request.POST.get('cliente')
-        blch.add_block(producto_id, nombre, cantidad, stock)
+        fecha = data['fecha']  # Usa la fecha proporcionada o la fecha actual
+        cliente = data['cliente']
+        blch.add_block(producto_id, nombre, cantidad, stock, fecha, cliente)
         return JsonResponse({'message': 'Block added successfully', 'block': blch.chain[-1].__dict__}, status=200)
 
 

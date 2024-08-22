@@ -2,14 +2,29 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from .models import Product, Order
 from django.contrib.auth.decorators import login_required
-from .forms import ProductForm
+from .forms import ProductForm, OrderForm
 from django.contrib.auth.models import User
 
 # Create your views here.
 @login_required(login_url='user-login')
 def index(request):
     # funcion para crear un "web" de entrada index
-    return render(request, "dashboard/index.html")
+    orders = Order.objects.all()
+    if request.method == "POST":
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.staff = request.user
+            instance.save()
+            return redirect("api-index")
+    else:
+        form = OrderForm()
+
+    context={
+        'orders':orders,
+        'form':form,
+    }
+    return render(request, "dashboard/index.html", context)
 
 @login_required(login_url='user-login')
 def staff(request):
