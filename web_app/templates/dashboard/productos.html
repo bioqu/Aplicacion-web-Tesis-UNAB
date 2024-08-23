@@ -7,13 +7,13 @@
 <div class="container">
 <div class="row my-4">
     <div class="col-md-4">
-        {% comment %} {% if messages %}
+        {% if messages %}
         {% for message in messages %}
         <div class="alert alert-{{ message.tags }}">
             {{ message }}
         </div>
         {% endfor %}
-        {% endif %} {% endcomment %}
+        {% endif %}
         <div class="card" style="width: 22rem;">
             <div class="card-body">
             <h5>Añadir nuevos productos</h5>

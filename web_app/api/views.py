@@ -4,12 +4,14 @@ from .models import Product, Order
 from django.contrib.auth.decorators import login_required
 from .forms import ProductForm, OrderForm
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 # Create your views here.
 @login_required(login_url='user-login')
 def index(request):
     # funcion para crear un "web" de entrada index
     orders = Order.objects.all()
+    products = Product.objects.all()
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -23,6 +25,7 @@ def index(request):
     context={
         'orders':orders,
         'form':form,
+        'products':products,
     }
     return render(request, "dashboard/index.html", context)
 
@@ -49,10 +52,22 @@ def productos(request):
     items = Product.objects.all() #usando ORM 
     #items = Product.objects.raw('SELECT * FROM api_product')
 
+    CATEGORY_TRANSLATIONS = {
+    'Food': 'Alimentos',
+    'Electronics': 'Electrónica',
+    'Stationary': 'Papelería',
+    }
+
+    # Traducir las categorías
+    for item in items:
+        item.category = CATEGORY_TRANSLATIONS.get(item.category, item.category)
+
     if request.method == "POST":
         form = ProductForm(request.POST)
         if form.is_valid():
             form.save()
+            product_name = form.cleaned_data.get('name')
+            messages.success(request, f'{product_name} ha sido añadido con exito')
             return redirect("api-productos") 
                          
     else:
@@ -94,7 +109,20 @@ def ordenes(request):
     # crear un "web" de entrada para ordenes
     orders = Order.objects.all()
 
+
+    if request.method == "POST":
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            form.save()
+            order_name = form.cleaned_data.get('product').name
+            messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
+            return redirect("api-ordenes")
+                         
+    else:
+        form = OrderForm()
+
     context={
         'orders':orders,
+        'form':form,
     }
     return render(request, "dashboard/ordenes.html", context)

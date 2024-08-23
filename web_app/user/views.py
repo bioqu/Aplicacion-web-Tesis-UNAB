@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect # type: ignore
 from django.contrib.auth.forms import UserCreationForm
 from .forms import CreateUserForm, UserUpdateForm, PerfilUpdateForm
+from django.contrib import messages
 
 # Create your views here.
 def register(request):
@@ -8,6 +9,8 @@ def register(request):
         form = CreateUserForm(request.POST)
         if form.is_valid():
             form.save()
+            username = form.cleaned_data.get('username')
+            messages.success(request, f'Se ha registrado la cuenta {username} correctamente. Continua al ingreso de usuarios')
             #user = 
             #group = Group.objects.get(name='Customers')
             #user.groups.add(group)

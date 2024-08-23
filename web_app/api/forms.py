@@ -12,11 +12,16 @@ class ProductForm(forms.ModelForm):
         }
 
 class OrderForm(forms.ModelForm):
+    product = forms.ModelChoiceField(
+        queryset=Product.objects.all(),
+        label='Nombre del Producto',
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+
     class Meta:
         model = Order
         fields = ['product', 'order_quantity']
         labels = {
             'product': 'Nombre del Producto',     
             'order_quantity': 'Cantidad',           
-            
         }

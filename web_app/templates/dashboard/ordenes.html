@@ -1,13 +1,33 @@
 {% extends "partials/base.html" %}
 {% block title %}Ordenes{% endblock %}
-
+{% load crispy_forms_tags %}
 {% block content %}
 
 {% include 'partials/topnav.html'%}
 
 <div class = "container">
 <div class="row my-4">
-    <div class="col-md-4"></div>
+    <div class="col-md-4">
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        <div class="card" style="width: 22rem;">
+            <div class="card-body">
+            <h5>Añadir una orden</h5>
+            <hr>
+            <form method="POST">
+                {% csrf_token %}
+                {{ form|crispy }}              
+                <input class="btn btn-success btn-block" type="submit" value="Añadir">
+            </form>
+        </div>
+    </div>
+    
+</div>
     <div class="col-md-8">
         <table class="table bg-white">
             <thead class="bg-info text-white">
