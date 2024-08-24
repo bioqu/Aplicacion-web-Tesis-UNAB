@@ -1,0 +1,62 @@
+{% extends "partials/base.html" %}
+{% block title %} Pagina Staff{% endblock %}
+
+{% block content %}
+{% include 'partials/topnav.html'%}
+<div class="container">
+    <div class="row my-4">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">Detalle de la Orden{{ orders.product.name }}</div>
+                <div class="row p-3">
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <th>Producto:</th> 
+                                    <td> {{ order.product.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Categoría:</th>
+                                    <td>{{ order.product.category }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Cantidad:</th>
+                                    <td>{{ order.quantity }}</td>
+                                <tr>
+                                    <th>Ordenado por:</th> 
+                                    <td>{{ order.ordered_by.username }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha:</th>
+                                    <td>{{ order.date | date:"d M Y, H:i" }}</td>
+
+                                </tr>
+                                <tr>
+                                    <th>Subir PDF</th> 
+                                    <td><form method="POST" enctype="multipart/form-data">
+                                            {% csrf_token %}
+                                            {{ form.as_p }}
+                                            <button type="submit">Subir PDF</button>
+                                    </form></td>
+                                </tr>
+
+                                    <tr>
+                                        <th>PDFs Adjuntos</th> 
+                                        <td>
+                                            {% for pdf in order.pdfs.all %}
+                                            <a href="{{ pdf.file.url }}">{{ pdf.file.name }}</a>
+                                        {% empty %}
+                                        No hay PDFs adjuntos a esta orden.
+                                        {% endfor %}</td>
+                                    </tr>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        
+                    
+
+{% endblock %}

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Order
+from .models import Product, Order, PDF
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -25,3 +25,8 @@ class OrderForm(forms.ModelForm):
             'product': 'Nombre del Producto',     
             'order_quantity': 'Cantidad',           
         }
+
+class PDFUploadForm(forms.ModelForm):
+    class Meta:
+        model = PDF
+        fields = ['file']  # Suponiendo que el modelo PDF tiene un campo 'file' para almacenar el PDF
