@@ -1,13 +1,22 @@
 from django import forms
 from api.models import Product
+from .models import Block
 
-class ProductForm(forms.ModelForm):
+class OrderForm(forms.ModelForm):
+    nombre = forms.ModelChoiceField(
+        queryset=Product.objects.all(),
+        to_field_name="name",
+        empty_label="Selecciona un producto",
+        label="Nombre del Producto"
+    )
+
     class Meta:
-        model = Product
-        fields = ['name', 'category', 'quantity']
+        model = Block
+        fields = ['orden_id', 'nombre', 'cantidad', 'cliente', 'stock']
         labels = {
-            'name': 'Nombre del Producto',     # Cambia "name" a "Nombre del Producto"
-            'category': 'Categoría',           # Cambia "category" a "Categoría"
-            'quantity': 'Cantidad Disponible', # Cambia "quantity" a "Cantidad Disponible"
+            'orden_id': 'ID de la Orden',
+            'nombre': 'Nombre del Producto',
+            'cantidad': 'Cantidad',
+            'cliente': 'Cliente',
+            'stock': 'Stock',
         }
-         

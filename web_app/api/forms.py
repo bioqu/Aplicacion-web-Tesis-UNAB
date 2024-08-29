@@ -17,14 +17,32 @@ class OrderForm(forms.ModelForm):
         label='Nombre del Producto',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
+    
+    quantity_available = forms.IntegerField(
+        label='Cantidad Disponible',
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'})
+    )
 
     class Meta:
         model = Order
-        fields = ['product', 'order_quantity']
+        fields = ['product', 'order_quantity', 'quantity_available']
         labels = {
-            'product': 'Nombre del Producto',     
-            'order_quantity': 'Cantidad',           
+            'product': 'Nombre del Producto',
+            'order_quantity': 'Cantidad',
+            'quantity_available': 'Cantidad Disponible'
         }
+
+    def __init__(self, *args, **kwargs):
+        super(OrderForm, self).__init__(*args, **kwargs)
+        if 'product' in self.data:
+            try:
+                product_id = int(self.data.get('product'))
+                product = Product.objects.get(id=product_id)
+                self.fields['quantity_available'].initial = product.quantity  # Aquí se asigna quantity a quantity_available
+            except (ValueError, TypeError, Product.DoesNotExist):
+                pass  # Si no existe el producto, dejar el campo vacío
+        elif self.instance.pk:
+            self.fields['quantity_available'].initial = self.instance.product.quantity  # Aquí también se asigna quantity a quantity_available
 
 class PDFUploadForm(forms.ModelForm):
     class Meta:

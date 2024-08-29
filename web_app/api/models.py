@@ -23,7 +23,7 @@ class Order(models.Model):
     date = models.DateTimeField(auto_now_add= True)
 
     def __str__(self):
-        return f'{self.product}-{self.order_quantity} ordered by {self.staff.username}'
+        return f'{self.product}-{self.order_quantity} ordered by {self.staff}'
     
 class PDF(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='pdfs')

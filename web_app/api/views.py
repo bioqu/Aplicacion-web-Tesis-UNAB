@@ -6,6 +6,7 @@ from .forms import ProductForm, OrderForm
 from django.contrib.auth.models import User
 from django.contrib import messages
 from .forms import PDFUploadForm
+from django.http import JsonResponse
 
 
 
@@ -160,6 +161,9 @@ def ordenes(request):
         form = OrderForm(request.POST)
         if form.is_valid():
             form.save()
+            instance = form.save(commit=False)
+            instance.staff = request.user
+            instance.save()
             order_name = form.cleaned_data.get('product').name
             messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
             return redirect("api-ordenes")
@@ -180,7 +184,7 @@ def ordenes(request):
 def order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
-#Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario)
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
@@ -192,7 +196,7 @@ def order_detail(request, pk):
             pdf = form.save(commit=False)
             pdf.order = order
             pdf.save()
-            return redirect('api-ordernes-detail', pk=order.pk)
+            return redirect('api-ordenes-detail', pk=order.pk)
     else:
         form = PDFUploadForm()
 
@@ -205,3 +209,79 @@ def order_detail(request, pk):
         
     }
     return render(request, "dashboard/ordenes_detail.html", context)
+
+
+@login_required(login_url='user-login')
+def order_edit(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+    #Contador de objetos (productos, ordenes y staff o usuario)
+    workers_count = User.objects.all().count()
+    orders_count = Order.objects.all().count()
+    item_count = Product.objects.all().count()
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('api-ordenes', pk=order.pk)
+    else:
+        form = OrderForm(instance=order)
+
+    context = {
+        'form': form,
+        'order': order,
+        'workers_count':workers_count,
+        'orders_count': orders_count,
+        'item_count':item_count,
+        
+    }
+    return render(request, "dashboard/ordenes_edit.html", context)
+
+@login_required(login_url='user-login')
+def staff_order_detail(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+    if request.method == 'POST':
+        form = PDFUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            pdf = form.save(commit=False)
+            pdf.order = order
+            pdf.save()
+            return redirect('api-index', pk=order.pk)
+    else:
+        form = PDFUploadForm()
+
+    context = {
+        'order': order,
+        'form': form,
+        
+    }
+    return render(request, "dashboard/staff_ordenes_detail.html", context)
+
+
+@login_required(login_url='user-login')
+def staff_order_edit(request, pk):
+    order = get_object_or_404(Order, pk=pk)
+
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=order)
+        if form.is_valid():
+            form.save()
+            return redirect('api-index')
+    else:
+        form = OrderForm(instance=order)
+
+    context = {
+        'form': form,
+        'order': order,        
+    }
+    return render(request, "dashboard/staff_ordenes_edit.html", context)
+
+def get_product_quantity(request, product_id):
+    try:
+        product = Product.objects.get(id=product_id)
+        return JsonResponse({'quantity': product.quantity})
+    except Product.DoesNotExist:
+        return JsonResponse({'quantity': 0})

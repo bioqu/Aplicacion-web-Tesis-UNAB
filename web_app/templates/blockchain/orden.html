@@ -4,47 +4,39 @@
 {% include 'blockchain/top_nav_block.html' %}
 <div class="container mt-4">
         <div class="card">
-            <div class="card-header bg-primary text-white">
+            <div class="card-header bg-info text-white">
                 Generar Orden
             </div>
             <div class="card-body">
-                <form id="orderForm" onsubmit="event.preventDefault(); generarOrden();">
-                    <table>
-                        <tr>
-                            <td><label for="producto_id">ID de la Orden:</label></td>
-                            <td><input type="text" id="producto_id" name="producto_id" required></td>
-                        </tr>
-                        <tr>
-                            <td><label for="nombre">Nombre del Producto:</label></td>
-                            <td>{{ item.name }}<input type="hidden" id="nombre_hidden" name="nombre" value="{{ item.name }}"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="cantidad">Cantidad:</label></td>
-                            <td><input type="number" id="cantidad" name="cantidad" required></td>
-                        </tr>
-                        <tr>
-                            <td><label for="stock">Stock:</label></td>
-                            <td>{{ item.quantity }}<input type="hidden" id="stock_hidden" name="stock" value="{{ item.quantity }}"></td>
-                        </tr>
-                        <tr>
-                            <td><label for="fecha">Fecha:</label></td>
-                            <td><input type="datetime-local" id="fecha" name="fecha" required></td>
-                        </tr>
-                        <tr>
-                            <td><label for="cliente">Cliente:</label></td>
-                            <td><input type="text" id="cliente" name="cliente" required></td>
-                        </tr>
-                        <tr>
-                            <td colspan="2" style="text-align: center;"><button type="submit">Generar Orden</button></td>
-                        </tr>
-                    </table>
+                <form id="orderForm" method="POST">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div style="text-align: center;">
+                        <button type="submit">Generar Orden</button>
+                    </div>
                 </form>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const productSelect = document.getElementById('id_product');
+                        const quantityAvailableInput = document.getElementById('id_quantity_available');
+                    
+                        productSelect.addEventListener('change', function() {
+                            const productId = productSelect.value;
+                            fetch(`/get_product_quantity/${productId}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    quantityAvailableInput.value = data.quantity_available;
+                                });
+                        });
+                    });
+                </script>
+                
             </div>
         </div>
         
 
         <div class="card mt-4">
-            <div class="card-header bg-primary text-white">Cadena de Bloques</div>
+            <div class="card-header bg-info text-white">Cadena de Bloques</div>
             <div class="card-body">
                 <div class="block-container" id="blockchainContainer">
                     <!-- Los bloques serán añadidos aquí -->

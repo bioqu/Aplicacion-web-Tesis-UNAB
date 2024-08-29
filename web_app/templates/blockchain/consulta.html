@@ -28,23 +28,61 @@
     
     <div class="container mt-4">
         <div class="card">
-            <div class="card-header bg-secondary text-white">Blockchain</div>
+            <div class="card-header bg-info text-white">Blockchain</div>
             <div class="card-body">
-            <form method="get" action="{% url 'blockchain-consulta' %}">
-                <label for="producto_id">Selecciona el ID de la Orden:</label>
-                <select id="producto_id" name="producto_id">
+            {% comment %} <form method="get" action="{% url 'blockchain-consulta' %}">
+                <label for="order_id">Selecciona el ID de la Orden:</label>
+                <select id="order_id" name="order_id">
                     <option value=""> Seleccionar </option>
                     {% for id in all_ids %}
                     <option value="{{ id }}">{{ id }}</option>
                     {% endfor %}
                 </select>
                 <button type="submit">Filtrar</button>
+            </form> {% endcomment %}
+            <form method="get" action="{% url 'blockchain-consulta' %}">
+                <label for="order_id">Buscar por ID de la Orden:</label>
+                <input type="text" id="order_id" name="order_id" placeholder="Ingresa el ID de la orden">
+                <button type="submit">Buscar</button>
             </form>
-       
+        </div>
+    </div>
+    <br>
+            <div class="block-container">
+                {% if blocks %}
+                    <table class="table bg-white">
+                        <thead class="bg-info text-white">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Stock</th>
+                                <th>Fecha</th>
+                                <th>Cliente</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for block in blocks %}
+                                <tr>
+                                    <td>{{ block.orden_id }}</td>
+                                    <td>{{ block.nombre }}</td>
+                                    <td>{{ block.cantidad }}</td>
+                                    <td>{{ block.stock }}</td>
+                                    <td>{{ block.fecha }}</td>
+                                    <td>{{ block.cliente }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No se encontraron bloques para el ID de orden proporcionado.</p>
+                {% endif %}
+            </div>
+       {% comment %} 
             <div class="block-container">
                 {% for block in blocks %}
                 <div class="block">
-                    <p>ID: {{ block.producto_id }}</p>
+                    <p>ID: {{ block.orden_id }}</p>
                     <p>Nombre: {{ block.nombre }}</p>
                     <p>Cantidad: {{ block.cantidad }}</p>
                     <p>Stock: {{ block.stock }}</p>
@@ -53,16 +91,10 @@
                     <p>Hash: {{ block.hash }}</p>
                     <p>Prev Hash: {{ block.prev_hash }}</p>
                 </div>
-                {% endfor %}
+                {% endfor %} {% endcomment %}
             </div>
         </div>
     </div>
-<div class="container mt-3">
-<div class="mx-auto " style="width: 200px;">
-<a href="{% url 'blockchain-dashboard' %}" class="btn btn-secondary">
-        Dashboard</a>
-    </div>
-</div>
 {% endblock%}
 </body>
 </html>

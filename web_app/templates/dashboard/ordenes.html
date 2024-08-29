@@ -17,13 +17,33 @@
         {% endif %}
         <div class="card" style="width: 22rem;">
             <div class="card-body">
-            <h5>Añadir una orden</h5>
+            <h5>Añadir una nueva orden</h5>
             <hr>
             <form method="POST">
                 {% csrf_token %}
                 {{ form|crispy }}              
                 <input class="btn btn-success btn-block" type="submit" value="Añadir">
             </form>
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const productSelect = document.getElementById('id_product');
+                    const quantityAvailableInput = document.getElementById('id_quantity_available');
+            
+                    productSelect.addEventListener('change', function () {
+                        const productId = productSelect.value;
+            
+                        if (productId) {
+                            fetch(`/get_product_quantity/${productId}/`)
+                                .then(response => response.json())
+                                .then(data => {
+                                    quantityAvailableInput.value = data.quantity;
+                                });
+                        } else {
+                            quantityAvailableInput.value = '';
+                        }
+                    });
+                });
+            </script>
         </div>
     </div>
     
@@ -37,19 +57,27 @@
                     <th scope="col">Cantidad</th>
                     <th scope="col">Ordenado por</th>
                     <th scope="col">Fecha</th>
-                    <th scope="col">#</th>
+                    <th scope="col">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 {% for orders in orders %}
                 <tr>
-                    <td>{{ orders.product }}</td>
+                    <td>{{ orders.product.name }}</td>
                     <td>{{ orders.product.category }}</td>
                     <td>{{ orders.order_quantity }}</td>
                     <td>{{ orders.staff }}</td>
                     <td>{{ orders.date|date:"d/M, H:i" }}</td>
-                    <td><a class="btn btn-info btn-sm mr-2"
-                        href="{% url 'api-ordenes-detail' orders.id %}">Ver</a></td>
+                    <td style="display: flex; gap: 5px;">
+                        <a class="btn btn-info btn-sm"
+                           href="{% url 'api-ordenes-detail' orders.id %}">Ver</a>
+                        <a class="btn btn-info btn-sm bg-dark"
+                           href="{% url 'api-ordenes-edit' orders.id %}">Editar</a>
+                    </td>
+                    {% comment %} <td><a class="btn btn-info btn-sm mr-2"
+                        href="{% url 'api-ordenes-detail' orders.id %}">Ver</a>
+                        <a class="btn btn-info btn-sm bg-dark" 
+                        href="{% url 'api-ordenes-edit' orders.id %}">Editar</a></td> {% endcomment %}
                 </tr>
                 {% endfor %}
             </tbody>

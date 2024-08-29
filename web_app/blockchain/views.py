@@ -1,15 +1,16 @@
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 import hashlib
-from .models import Block
 from api.models import Product
-from api.forms import ProductForm
+from .models import Block
+from .forms import OrderForm
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
+from django.shortcuts import get_object_or_404
 
 class Bloque:
-    def __init__(self, producto_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash=''):
-        self.producto_id = producto_id
+    def __init__(self, order_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash=''):
+        self.order_id = order_id
         self.nombre = nombre
         self.cantidad = cantidad
         self.stock = stock
@@ -30,16 +31,16 @@ class MiBlock:
         resultado = hashlib.sha256(data.encode())
         return resultado.hexdigest()
 
-    def add_block(self, producto_id, nombre, cantidad, stock, fecha, cliente):
+    def add_block(self, order_id, nombre, cantidad, stock, fecha, cliente):
         prev_hash = self.chain[-1].hash
-        data = f"{producto_id}{nombre}{cantidad}{stock}{fecha},{cliente}"
+        data = f"{order_id}{nombre}{cantidad}{stock}{fecha},{cliente}"
         hash = self.hashGenerator(data + prev_hash)
-        block = Bloque(producto_id, nombre, cantidad, stock, fecha, cliente, hash, prev_hash)
+        block = Bloque(order_id, nombre, cantidad, stock, fecha, cliente, hash, prev_hash)
         self.chain.append(block)
         
         # Guardar en la base de datos
         Block.objects.create(
-            producto_id=producto_id,
+            order_id=order_id,
             nombre=nombre,
             cantidad=cantidad,
             stock=stock,
@@ -55,13 +56,13 @@ blch = MiBlock()
 def add_block(request):
     if request.method == 'POST':
         data = request.POST
-        producto_id = data['producto_id']
+        order_id = data['ordenes_id']
         nombre = data['nombre']
         cantidad = data['cantidad']
         stock = data['stock']
         fecha = data['fecha']  # Usa la fecha proporcionada o la fecha actual
         cliente = data['cliente']
-        blch.add_block(producto_id, nombre, cantidad, stock, fecha, cliente)
+        blch.add_block(order_id, nombre, cantidad, stock, fecha, cliente)
         return JsonResponse({'message': 'Block added successfully', 'block': blch.chain[-1].__dict__}, status=200)
 
 
@@ -72,13 +73,13 @@ def get_chain(request):
 
 def consulta(request):
     # Obtener solo los IDs únicos de los bloques
-    all_ids = Block.objects.values_list('producto_id', flat=True).distinct()
-    print(f"All IDs: {all_ids}")  # Agrega esta línea para depurar
+    all_ids = Block.objects.values_list('orden_id', flat=True).distinct()
+    print(f"Todos los IDs: {all_ids}")  # Agrega esta línea para depurar
 
     # Filtrar los bloques por ID si se ha seleccionado uno
-    producto_id = request.GET.get('producto_id')
-    if producto_id:
-        blocks = Block.objects.filter(producto_id=producto_id)
+    orden_id = request.GET.get('orden_id')
+    if orden_id:
+        blocks = Block.objects.filter(orden_id=orden_id)
     else:
         blocks = Block.objects.all()
 
@@ -91,55 +92,34 @@ def consulta(request):
 
     return render(request, 'blockchain/consulta.html', context)
 
-def index(request):
+""" def index(request):
     items = Product.objects.all() #usando ORM 
-    #items = Product.objects.raw('SELECT * FROM api_product')
-
-    if request.method == "POST":
-        form = ProductForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("api-productos") 
-                         
-    else:
-        form = ProductForm()
 
     context = {
         'items': items,
-        'form': form,
     }
-    return render(request, 'blockchain/index.html', context)
+    return render(request, 'blockchain/index.html', context) """
 
-def orden(request, pk):
-    item = Product.objects.get(id=pk)
+
+def orden(request):
+    block_order = Block.objects.all()
 
     if request.method == "POST":
-        form = ProductForm(request.POST, instance=item)
+        form = OrderForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect("blockchain-index")
-
+            return redirect("blockchain-orden")
     else:
-        form = ProductForm(instance=item)
+        form = OrderForm()
 
-    context={
-        'item':item,
-        'form':form,
+    context = {
+        'bloc_order': block_order,
+        'form': form,
     }
     return render(request, "blockchain/orden.html", context)
-
-
-#vista para dashboard blockchain
-# def dashboard(request):
-#     producto_id = request.GET.get('producto_id')
-#     if producto_id:
-#         blocks = Block.objects.filter(producto_id=producto_id)
-#     else:
-#         blocks = Block.objects.none()  # No mostrar ningún bloque por defecto
-#     all_ids = Block.objects.values_list('producto_id', flat=True).distinct()  # Obtener todos los IDs únicos
-#     return render(request, 'blockchain/dashboard.html', {'blocks': blocks, 'all_ids': all_ids}) 
 
 # blockchain/views.py
 def blockchain_dashboard(request):
     return render(request, 'blockchain/dashboard.html')
+
 

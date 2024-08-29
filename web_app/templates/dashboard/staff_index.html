@@ -12,6 +12,26 @@
                         {{ form|crispy }}
                         <input class="btn btn-info btn-block" type="submit" value="Haz un pedido">
                     </form>
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const productSelect = document.getElementById('id_product');
+                            const quantityAvailableInput = document.getElementById('id_quantity_available');
+                    
+                            productSelect.addEventListener('change', function () {
+                                const productId = productSelect.value;
+                    
+                                if (productId) {
+                                    fetch(`/get_product_quantity/${productId}/`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            quantityAvailableInput.value = data.quantity;
+                                        });
+                                } else {
+                                    quantityAvailableInput.value = '';
+                                }
+                            });
+                        });
+                    </script>
                 </div>
             </div>
         </div>
@@ -29,6 +49,7 @@
                                 <th scope="col">Cantidad</th>
                                 <th scope="col">Ordenado por</th>
                                 <th scope="col">Fecha</th>
+                                <th scope="col">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -40,6 +61,12 @@
                                 <td>{{ order.order_quantity }}</td>
                                 <td>{{ order.staff }}</td>
                                 <td>{{ order.date|date:"d M Y, H:i" }}</td>
+                                <td style="display: flex; gap: 5px;">
+                                    <a class="btn btn-info btn-sm"
+                                       href="{% url 'api-staff-ordenes-detail' order.id %}">Ver</a>
+                                    <a class="btn btn-info btn-sm bg-dark"
+                                       href="{% url 'api-staff-ordenes-edit' order.id %}">Editar</a>
+                                </td>
                                 
                             </tr>
                             {% endif %}

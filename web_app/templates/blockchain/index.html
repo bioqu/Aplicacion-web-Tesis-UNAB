@@ -45,7 +45,7 @@
                     <td>{{ item.quantity }}</td>
                     <td>
                         <a class="btn btn-info btn-sm mr-2"
-                            href="{% url "blockchain-orden" item.id %}">Crear Orden</a>
+                            href="{% url "blockchain-orden" item.name %}">Crear Orden</a>
                     </td>
                 </tr>
                 {% endfor %}

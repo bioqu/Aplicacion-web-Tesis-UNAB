@@ -1,0 +1,44 @@
+{% extends "partials/base.html" %}
+{% block title %} Pagina Edicion de Ordenes{% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+{% include 'partials/topnav.html'%}
+<div class="container">
+    <div class="row my-4">
+        <div class="col-md-4"></div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-info text-white">Editar la Orden</div>
+                <div class="row p-3">
+                    <div class="col-md-8">
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ form|crispy }}
+                            {% comment %} <div>
+                                <label for="id_product">Nombre del Producto:</label>
+                                <br>{{ form.product }}<br>
+                            </div>
+                            <div>
+                                <label for="id_quantity_available">Cantidad Disponible:</label>
+                                <br>{{ form.quantity_available }}<br>
+                            </div>
+                            <div>
+                                <label for="id_order_quantity">Cantidad:</label>
+                                <br>{{ form.order_quantity }}<br>
+                            </div>
+                            <br> {% endcomment %}
+                            <button type="submit">Guardar Orden</button>
+                        </form>
+                        <br>
+
+                        <a href="{% url 'api-ordenes' %}" class="btn btn-secondary">Cancelar</a>
+                        
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                        
+                    
+                
+{% endblock %}
