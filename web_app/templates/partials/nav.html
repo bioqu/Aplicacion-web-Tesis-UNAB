@@ -5,27 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Navbar with Dropdown</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        /* Estilos específicos para que el botón de logout se vea como un enlace */
-        .dropdown-item form {
-            margin: 0;
-            padding: 0;
-        }
-
-        .dropdown-item form button {
-            background: none;
-            border: none;
-            color: black;
-            padding: 0;
-            text-align: left;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .dropdown-item form button:hover {
-            background-color: #f8f9fa;
-        }
-    </style>
 </head>
 <body>
   {% load crispy_forms_tags %}
@@ -43,21 +22,16 @@
     <li class="nav-item">
       <a class="nav-link" href={% url "api-index" %}>Dashboard</a>
     </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
-        Menu
-      </a>
-      <div class="dropdown-menu">
-        <a class="dropdown-item" href="#">Administrador</a>
+    <li class="nav-item">
         {% if  user.is_authenticated and user.is_staff and user.is_superuser%}
-        <a class="dropdown-item" href={% url "blockchain-dashboard" %}>Blockchain</a>
+        <a class="nav-link" href={% url "blockchain-dashboard" %}>Blockchain</a>
         {% endif %}
-        <a class="dropdown-item">
+      </li>
+      <li class="nav-item">
           <form method="post" action="{% url 'user-logout' %}">
           {% csrf_token %}
-          <button type="submit">Logout</button></form>
+          <button type="submit" class="btn btn-primary">Logout</button></form>
         </a>
-      </div>
     </li>
   </ul>
     {% else %}
@@ -71,10 +45,6 @@
         </li>
       </ul>
     {% endif %}
-    <form class="form-inline my-2 my-lg-0 ml-auto">
-      <input class="form-control mr-sm-2" type="Busqueda" placeholder="Busqueda" aria-label="Busqueda">
-      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Busqueda</button>
-    </form>
   </div>
 </nav>
 </body>

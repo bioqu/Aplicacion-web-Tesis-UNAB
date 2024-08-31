@@ -3,20 +3,14 @@ from api.models import Product
 from .models import Block
 
 class OrderForm(forms.ModelForm):
-    nombre = forms.ModelChoiceField(
-        queryset=Product.objects.all(),
-        to_field_name="name",
-        empty_label="Selecciona un producto",
-        label="Nombre del Producto"
-    )
-
     class Meta:
         model = Block
-        fields = ['orden_id', 'nombre', 'cantidad', 'cliente', 'stock']
+        fields = ['orden_id', 'nombre', 'cantidad', 'stock', 'cliente']
         labels = {
             'orden_id': 'ID de la Orden',
             'nombre': 'Nombre del Producto',
             'cantidad': 'Cantidad',
-            'cliente': 'Cliente',
             'stock': 'Stock',
+            'cliente': 'Cliente',
+            
         }

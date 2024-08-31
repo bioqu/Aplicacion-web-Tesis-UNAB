@@ -1,0 +1,44 @@
+{% extends 'partials/base.html' %}
+{% block content %}
+{% include 'blockchain/top_nav_block.html' %}
+<div class="container mt-4">
+    <div class="card">
+<div class="block-container">
+    {% if blocks %}
+    <table class="table bg-white">
+        <thead class="bg-info text-white">
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Cantidad</th>
+                <th>Stock</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Acciones</th> <!-- Nueva columna para acciones -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for block in blocks %}
+                <tr>
+                    <td>{{ block.orden_id }}</td>
+                    <td>{{ block.nombre }}</td>
+                    <td>{{ block.cantidad }}</td>
+                    <td>{{ block.stock }}</td>
+                    <td>{{ block.fecha }}</td>
+                    <td>{{ block.cliente }}</td>
+                    <td>
+                        <!-- Botón para crear cadena con este blockchain -->
+                        <a class="btn btn-info btn-sm mr-2"
+                            href="{% url 'crear-cadena' block.nombre %}">Crear cadena</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No se encontraron bloques.</p>
+{% endif %}
+</div>
+</div>
+<br>
+{% endblock %}

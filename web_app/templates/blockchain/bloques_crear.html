@@ -1,0 +1,52 @@
+{% extends 'partials/base.html' %}
+{% block content %}
+{% include 'blockchain/top_nav_block.html' %}
+
+<div class="container mt-4">
+    <h1>Crear Cadena</h1>
+    <hr>
+
+    <h2>Detalles del Blockchain</h2>
+    <table class="table table-bordered">
+        <tr>
+            <th>ID</th>
+            <td>{{ block.orden_id }}</td>
+        </tr>
+        <tr>
+            <th>Nombre</th>
+            <td>{{ block.nombre }}</td>
+        </tr>
+        <tr>
+            <th>Cantidad</th>
+            <td>{{ block.cantidad }}</td>
+        </tr>
+        <tr>
+            <th>Stock</th>
+            <td>{{ block.stock }}</td>
+        </tr>
+        <tr>
+            <th>Fecha</th>
+            <td>{{ block.fecha }}</td>
+        </tr>
+        <tr>
+            <th>Cliente</th>
+            <td>{{ block.cliente }}</td>
+        </tr>
+    </table>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="nombre">Nombre de la Cadena</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" value="Cadena de {{ block.nombre }}" required>
+        </div>
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3">Cadena creada a partir del blockchain con ID {{ block.orden_id }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Crear Cadena</button>
+    </form>
+</div>
+
+<script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+{% endblock %}

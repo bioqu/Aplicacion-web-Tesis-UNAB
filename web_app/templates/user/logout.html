@@ -1,8 +1,8 @@
 {% extends 'partials/base.html' %}
 {% block title %}Pagina de Logout{% endblock %}
-
+{% load crispy_forms_tags %}
 {% block content %}
-{% csrf_token %}
+
 <div class="row my-4">
     <div class="col-md-6 offset-md-3">
         <div class="border p-3 bg-white">

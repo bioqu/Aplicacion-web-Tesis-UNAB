@@ -8,6 +8,13 @@
                 Generar Orden
             </div>
             <div class="card-body">
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
                 <form id="orderForm" method="POST">
                     {% csrf_token %}
                     {{ form|crispy }}
@@ -45,7 +52,7 @@
         </div>
     </div>
     
-    <script>
+   {% comment %}  <script>
         async function generarOrden() {
             const formData = new FormData(document.getElementById('orderForm'));
 
@@ -83,7 +90,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', actualizarCadena);
-    </script>
+    </script> {% endcomment %}
     {% endblock %}
 </body>
 </html>
