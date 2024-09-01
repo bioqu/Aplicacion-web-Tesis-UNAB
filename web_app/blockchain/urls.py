@@ -7,5 +7,5 @@ urlpatterns = [
     path('consulta/', views.consulta, name='blockchain-consulta'),
     path("ordenes/", views.orden, name="blockchain-orden"),
     path('bloques/', views.lista_bloques, name='blockchain-bloques'),
-    path("crear_cadena/<str:nombre>/", views.crear_cadena, name='crear-cadena'), 
+    path("bloques/segundo_bloque/<int:pk>/", views.segundo_bloque, name='blockchain-cadena'), 
 ]

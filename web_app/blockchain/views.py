@@ -8,6 +8,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 from django.shortcuts import get_object_or_404
 from django.contrib import messages
+from django.shortcuts import HttpResponse
 
 class Bloque:
     def __init__(self, order_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash=''):
@@ -162,3 +163,46 @@ def crear_cadena(request, nombre):
         return redirect('blockchain-bloques')  # Redirige a la lista de bloques después de crear la cadena
 
     return render(request, 'blockchain/bloques_crear.html', {'block': block})
+
+def segundo_bloque(request, pk):
+    # Recuperar el primer bloque relacionado con esta orden_id
+    primer_bloque = Block.objects.filter(orden_id=pk).first()
+    
+    if not primer_bloque:
+        # Manejar el caso en que no existe un bloque con este orden_id
+        return HttpResponse("No se encontró el primer bloque", status=404)
+    
+    if request.method == 'POST':
+        form = OrderForm(request.POST, instance=primer_bloque)
+        if form.is_valid():
+            # Mantén el nombre de la orden del primer bloque
+            nombre = primer_bloque.nombre
+            
+            # Obtén los datos adicionales del formulario
+            cantidad = form.cleaned_data['cantidad']
+            stock = form.cleaned_data['stock']
+            cliente = form.cleaned_data['cliente']
+
+            # Crear el segundo bloque con el hash del primer bloque como prev_hash
+            mi_block = MiBlock()
+            prev_hash = primer_bloque.hash  # Usar el hash del primer bloque como prev_hash
+            data = f"{pk}{nombre}{cantidad}{stock}{timezone.now()},{cliente}"
+            new_hash = mi_block.hashGenerator(data + prev_hash)
+            
+            # Guardar ambos bloques en la cadena
+            Block.objects.create(
+                orden_id=pk,
+                nombre=nombre,
+                cantidad=cantidad,
+                stock=stock,
+                fecha=timezone.now(),
+                cliente=cliente,
+                hash=new_hash,
+                prev_hash=prev_hash
+            )
+            
+            return redirect('blockchain-bloques')
+    else:
+        form = OrderForm(instance=primer_bloque)
+
+    return render(request, 'blockchain/segundo_bloque.html', {'form': form})
