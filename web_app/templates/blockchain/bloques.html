@@ -53,10 +53,8 @@
             {% for cadena in cadenas %}
             <tr>
                 <td>{{ cadena.nombre }}</td>
-                <td> {% for block in blocks %}
-                    {% if block.cadena %}
+                <td> {% for block in cadena.bloques.all %}
                     Orden ID: {{ block.orden_id }} - Nombre: {{ block.nombre }}
-                    {% endif %} 
                     {% endfor %}
                 </tr>
     {% endfor %}
