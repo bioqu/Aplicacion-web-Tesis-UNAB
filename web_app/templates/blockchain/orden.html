@@ -1,4 +1,5 @@
 {% extends 'partials/base.html' %}
+{% block title %}Ordenes{% endblock %}
 {% load crispy_forms_tags %}
 {% block content %}
 {% include 'blockchain/top_nav_block.html' %}
@@ -41,56 +42,4 @@
             </div>
         </div>
         
-
-        <div class="card mt-4">
-            <div class="card-header bg-info text-white">Cadena de Bloques</div>
-            <div class="card-body">
-                <div class="block-container" id="blockchainContainer">
-                    <!-- Los bloques serán añadidos aquí -->
-                </div>
-            </div>
-        </div>
-    </div>
-    
-   {% comment %}  <script>
-        async function generarOrden() {
-            const formData = new FormData(document.getElementById('orderForm'));
-
-            const response = await fetch('/blockchain/add_block/', {
-                method: 'POST',
-                body: formData
-            });
-
-            if (response.ok) {
-                actualizarCadena();
-            } else {
-                console.error('Error al agregar el bloque');
-            }
-        }
-
-        async function actualizarCadena() {
-            const response = await fetch('/blockchain/get_chain/');
-            const blocks = await response.json();
-
-            const container = document.getElementById('blockchainContainer');
-            container.innerHTML = ''; // Limpiar contenido previo
-
-            blocks.forEach(block => {
-                const blockElement = document.createElement('div');
-                blockElement.className = 'block';
-
-                for (const [key, value] of Object.entries(block)) {
-                    const p = document.createElement('p');
-                    p.textContent = `${key}: ${value}`;
-                    blockElement.appendChild(p);
-                }
-
-                container.appendChild(blockElement);
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', actualizarCadena);
-    </script> {% endcomment %}
-    {% endblock %}
-</body>
-</html>
+{% endblock %}

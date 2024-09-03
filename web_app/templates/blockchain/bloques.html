@@ -1,4 +1,5 @@
 {% extends 'partials/base.html' %}
+{% block title %}Cadenas de Blockchain{% endblock %}
 {% block content %}
 {% include 'blockchain/top_nav_block.html' %}
 <div class="container mt-4">
@@ -14,7 +15,7 @@
                 <th>Stock</th>
                 <th>Fecha</th>
                 <th>Cliente</th>
-                <th>Acciones</th> <!-- Nueva columna para acciones -->
+                <th>Acciones</th> 
             </tr>
         </thead>
         <tbody>
@@ -27,9 +28,8 @@
                     <td>{{ block.fecha }}</td>
                     <td>{{ block.cliente }}</td>
                     <td>
-                        <!-- Botón para crear cadena con este blockchain -->
                         <a class="btn btn-info btn-sm mr-2"
-                            href="{% url 'blockchain-cadena' block.orden_id %}">Crear cadena</a>
+                            href="{% url 'blockchain-cadena' block.orden_id %}">Agregar Bloque</a>
                     </td>
                 </tr>
             {% endfor %}

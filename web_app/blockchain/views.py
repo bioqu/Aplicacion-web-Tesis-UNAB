@@ -61,6 +61,10 @@ def get_chain(request):
     return JsonResponse(chain_data, safe=False, status=200)
 
 def consulta(request):
+    #Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
     # Obtener solo los IDs únicos de los bloques
     all_ids = Block.objects.values_list('orden_id', flat=True).distinct()
     print(f"Todos los IDs: {all_ids}")  # Agrega esta línea para depurar
@@ -77,11 +81,17 @@ def consulta(request):
     context = {
         'all_ids': all_ids,
         'blocks': blocks,
+        'block_count':block_count,
+        'cadena_count':cadena_count,
     }
 
     return render(request, 'blockchain/consulta.html', context)
 
 def orden(request):
+    # Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
     if request.method == 'POST':
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -111,16 +121,47 @@ def orden(request):
 
     context = {
         'form': form,
-        # Puedes pasar opciones para que el usuario elija una cadena si es necesario
-        'cadenas': Cadena.objects.all()
+        'cadenas': Cadena.objects.all(),
+        'block_count':block_count,
+        'cadena_count':cadena_count,
     }
     return render(request, "blockchain/orden.html", context)
 
+
 # blockchain/views.py
 def blockchain_dashboard(request):
-    return render(request, 'blockchain/dashboard.html')
+    block = Block.objects.all()
+    cadena = Cadena.objects.all()
+
+    #Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
+    if request.method == "POST":
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.staff = request.user
+            instance.save()
+            return redirect("Blockchain-dashboard")
+    else:
+        form = OrderForm()
+
+    context = {
+        'form':form,
+        'blocks':block,
+        'cadenas':cadena,
+        'block_count':block_count,
+        'cadena_count':cadena_count,
+
+    }
+    return render(request, 'blockchain/dashboard.html', context)
 
 def lista_bloques(request):
+    #Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
     blocks = Block.objects.filter(completado=False) #muestra bloques que no están completados
 
     cadenas = Cadena.objects.all()  # Obtén todas las cadenas
@@ -142,7 +183,9 @@ def lista_bloques(request):
 
     context = {
         'blocks': blocks,
-        'cadenas': cadenas
+        'cadenas': cadenas,
+        'block_count':block_count,
+        'cadena_count':cadena_count,
     }
 
     return render(request, 'blockchain/bloques.html', context)
@@ -171,39 +214,41 @@ def crear_cadena(request, nombre):
     return render(request, 'blockchain/bloques_crear.html', {'block': block})
 
 def segundo_bloque(request, pk):
-    # Recuperar el primer bloque relacionado con esta orden_id
-    primer_bloque = Block.objects.filter(orden_id=pk).first()
+    # Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
+    # Recuperar los bloques relacionados con esta orden_id
+    bloques_relacionados = Block.objects.filter(orden_id=pk).order_by('fecha')
     
-    if not primer_bloque:
-        # Si no hay bloques para ese orden_id
-        return HttpResponse("No se encontró el primer bloque", status=404)
+    # Si no hay bloques, no deberíamos estar en esta vista
+    if not bloques_relacionados.exists():
+        return HttpResponse("No se encontró ningún bloque relacionado con esta orden_id", status=404)
+
+    # Identificar el último bloque (el más reciente en la cadena)
+    ultimo_bloque = bloques_relacionados.last()
     
-    # Filtrar bloques ya usados en la cadena, dejando afuera los completados
-    bloques_incompletos = Block.objects.filter(cadena=primer_bloque.cadena, completado=False)
-    
+    # Filtrar bloques incompletos (opcional, según lo que necesites mostrar)
+    bloques_incompletos = Block.objects.filter(cadena=ultimo_bloque.cadena, completado=False)
+
     if request.method == 'POST':
-        # No utilizar instance=primer_bloque, para evitar el prellenado completo
         form = OrderForm2(request.POST)
-        
+
         if form.is_valid():
-            # Mantén el nombre de la orden del primer bloque
-            nombre = primer_bloque.nombre
-            
+            # Mantén el nombre de la orden del bloque anterior
+            nombre = ultimo_bloque.nombre
+
             # Obtén los datos adicionales del formulario
             cantidad = form.cleaned_data['cantidad']
             stock = form.cleaned_data['stock']
             cliente = form.cleaned_data['cliente']
-            cadena = primer_bloque.cadena
+            cadena = ultimo_bloque.cadena
 
-            if not cadena:
-                # Si la cadena no existe, crea una nueva
-                cadena = Cadena.objects.create(nombre=f"Cadena de {nombre}", descripcion="Descripción de la cadena")
-                primer_bloque.cadena = cadena
-                primer_bloque.save()
-
-            # Crear el segundo bloque con el hash del primer bloque como prev_hash
+            # Crear el nuevo bloque
             mi_block = MiBlock()
-            prev_hash = primer_bloque.hash  # Usar el hash del primer bloque como prev_hash
+            
+            # Usar el hash del último bloque como prev_hash para el nuevo bloque
+            prev_hash = ultimo_bloque.hash
             data = f"{pk}{nombre}{cantidad}{stock}{timezone.now()},{cliente}"
             new_hash = mi_block.hashGenerator(data + prev_hash)
             
@@ -220,27 +265,38 @@ def segundo_bloque(request, pk):
                 prev_hash=prev_hash
             )
 
-            # Marcar el primer bloque como completado
-            primer_bloque.completado = True
-            primer_bloque.save()
+            # Marcar el bloque anterior como completado
+            ultimo_bloque.completado = True
+            ultimo_bloque.save()
             
             return redirect('blockchain-bloques')
     else:
         # Prellenar manualmente los campos en el formulario
         form = OrderForm2(initial={
-            'orden_id': primer_bloque.orden_id,
-            'nombre': primer_bloque.nombre,
-            'cantidad': primer_bloque.cantidad,  # Si deseas prellenar la cantidad del primer bloque
-            'stock': primer_bloque.stock,        # Si deseas prellenar el stock del primer bloque
-            'cliente': primer_bloque.cliente
+            'orden_id': ultimo_bloque.orden_id,
+            'nombre': ultimo_bloque.nombre,
+            'cantidad': ultimo_bloque.cantidad,  # Si deseas prellenar la cantidad del primer bloque
+            'stock': ultimo_bloque.stock,        # Si deseas prellenar el stock del primer bloque
+            'cliente': ultimo_bloque.cliente
         })
         # Bloquear los campos para que no se puedan editar
         form.fields['orden_id'].widget.attrs['readonly'] = True
         form.fields['nombre'].widget.attrs['readonly'] = True
 
-    return render(request, 'blockchain/segundo_bloque.html', {'form': form, 'bloques_incompletos': bloques_incompletos})
+    return render(request, 'blockchain/segundo_bloque.html', {'form': form, 'bloques_incompletos': bloques_incompletos, 'block_count':block_count, 'cadena_count':cadena_count,})
+
 
 def ver_cadena(request, cadena_id):
+    #Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
     cadena = get_object_or_404(Cadena, id=cadena_id)
     bloques = cadena.bloques.all()  # Obtén todos los bloques de la cadena
-    return render(request, 'blockchain/bloques.html', {'cadena': cadena, 'bloques': bloques})
+    return render(request, 'blockchain/bloques.html', {'cadena': cadena, 'bloques': bloques, 'block_count':block_count, 'cadena_count':cadena_count,})
+
+def get_product_quantity(request, product_name):
+    try:
+        product = Product.objects.get(name=product_name)
+        return JsonResponse({'quantity': product.quantity})
+    except Product.DoesNotExist:
+        return JsonResponse({'error': 'Producto no encontrado'}, status=404)

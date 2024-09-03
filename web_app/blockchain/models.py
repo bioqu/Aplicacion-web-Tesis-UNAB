@@ -6,6 +6,9 @@ class Cadena(models.Model):
     nombre = models.CharField(max_length=255)
     descripcion = models.TextField(blank=True, null=True)
 
+    def cantidad_de_bloques(self):
+        return self.bloques.count()
+
     def __str__(self):
         return self.nombre
 

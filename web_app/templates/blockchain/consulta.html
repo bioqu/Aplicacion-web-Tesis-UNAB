@@ -1,45 +1,12 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Blockchain Dashboard</title>
-    <style>
-        .block-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-        .block p {
-            margin: 5px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-            max-width: 180px;
-        }             
-        .block p {
-            margin: 5px 0;
-        }
-    </style>
-</head>
-<body>
-    {% extends 'partials/base.html' %}
-    {% block content %}
-    {% include 'blockchain/top_nav_block.html' %}
+{% extends 'partials/base.html' %}
+{% block title %}Blockchain{% endblock %}
+{% block content %}
+{% include 'blockchain/top_nav_block.html' %}
     
     <div class="container mt-4">
         <div class="card">
             <div class="card-header bg-info text-white">Blockchain</div>
             <div class="card-body">
-            {% comment %} <form method="get" action="{% url 'blockchain-consulta' %}">
-                <label for="order_id">Selecciona el ID de la Orden:</label>
-                <select id="order_id" name="order_id">
-                    <option value=""> Seleccionar </option>
-                    {% for id in all_ids %}
-                    <option value="{{ id }}">{{ id }}</option>
-                    {% endfor %}
-                </select>
-                <button type="submit">Filtrar</button>
-            </form> {% endcomment %}
             <form method="get" action="{% url 'blockchain-consulta' %}">
                 <label for="order_id">Buscar por ID de la Orden:</label>
                 <input type="text" id="order_id" name="order_id" placeholder="Ingresa el ID de la orden">
@@ -96,5 +63,4 @@
         </div>
     </div>
 {% endblock%}
-</body>
-</html>
+
