@@ -121,7 +121,8 @@ def blockchain_dashboard(request):
     return render(request, 'blockchain/dashboard.html')
 
 def lista_bloques(request):
-    blocks = Block.objects.all()
+    blocks = Block.objects.filter(completado=False) #muestra bloques que no están completados
+
     cadenas = Cadena.objects.all()  # Obtén todas las cadenas
 
     if request.method == 'POST':
@@ -174,11 +175,16 @@ def segundo_bloque(request, pk):
     primer_bloque = Block.objects.filter(orden_id=pk).first()
     
     if not primer_bloque:
-        # Manejar el caso en que no existe un bloque con este orden_id
+        # Si no hay bloques para ese orden_id
         return HttpResponse("No se encontró el primer bloque", status=404)
     
+    # Filtrar bloques ya usados en la cadena, dejando afuera los completados
+    bloques_incompletos = Block.objects.filter(cadena=primer_bloque.cadena, completado=False)
+    
     if request.method == 'POST':
-        form = OrderForm2(request.POST, instance=primer_bloque)
+        # No utilizar instance=primer_bloque, para evitar el prellenado completo
+        form = OrderForm2(request.POST)
+        
         if form.is_valid():
             # Mantén el nombre de la orden del primer bloque
             nombre = primer_bloque.nombre
@@ -201,7 +207,7 @@ def segundo_bloque(request, pk):
             data = f"{pk}{nombre}{cantidad}{stock}{timezone.now()},{cliente}"
             new_hash = mi_block.hashGenerator(data + prev_hash)
             
-            # Guardar ambos bloques en la cadena
+            # Guardar el nuevo bloque en la cadena
             Block.objects.create(
                 cadena=cadena,
                 orden_id=pk,
@@ -213,12 +219,26 @@ def segundo_bloque(request, pk):
                 hash=new_hash,
                 prev_hash=prev_hash
             )
+
+            # Marcar el primer bloque como completado
+            primer_bloque.completado = True
+            primer_bloque.save()
             
             return redirect('blockchain-bloques')
     else:
-        form = OrderForm2(instance=primer_bloque)
+        # Prellenar manualmente los campos en el formulario
+        form = OrderForm2(initial={
+            'orden_id': primer_bloque.orden_id,
+            'nombre': primer_bloque.nombre,
+            'cantidad': primer_bloque.cantidad,  # Si deseas prellenar la cantidad del primer bloque
+            'stock': primer_bloque.stock,        # Si deseas prellenar el stock del primer bloque
+            'cliente': primer_bloque.cliente
+        })
+        # Bloquear los campos para que no se puedan editar
+        form.fields['orden_id'].widget.attrs['readonly'] = True
+        form.fields['nombre'].widget.attrs['readonly'] = True
 
-    return render(request, 'blockchain/segundo_bloque.html', {'form': form})
+    return render(request, 'blockchain/segundo_bloque.html', {'form': form, 'bloques_incompletos': bloques_incompletos})
 
 def ver_cadena(request, cadena_id):
     cadena = get_object_or_404(Cadena, id=cadena_id)

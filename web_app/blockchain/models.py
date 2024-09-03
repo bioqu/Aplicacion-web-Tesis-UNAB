@@ -20,6 +20,7 @@ class Block(models.Model):
     hash = models.CharField(max_length=64)
     prev_hash = models.CharField(max_length=64)
     timestamp = models.DateTimeField(auto_now_add=True)
+    completado = models.BooleanField(default=False)
 
     
     def __str__(self):
