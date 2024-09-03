@@ -1,17 +1,16 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse
 import hashlib
 from api.models import Product
 from .models import Block, Cadena
-from .forms import OrderForm
+from .forms import OrderForm, OrderForm2
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
-from django.shortcuts import get_object_or_404
 from django.contrib import messages
 from django.shortcuts import HttpResponse
 
 class Bloque:
-    def __init__(self, order_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash=''):
+    def __init__(self, order_id, nombre, cantidad, stock, fecha, cliente, hash , prev_hash='', cadena=None):
         self.orden_id = order_id
         self.nombre = nombre
         self.cantidad = cantidad
@@ -20,6 +19,7 @@ class Bloque:
         self.cliente = cliente
         self.hash = hash
         self.prev_hash = prev_hash
+        self.cadena = cadena 
 
 class MiBlock:
     def __init__(self):
@@ -33,11 +33,11 @@ class MiBlock:
         resultado = hashlib.sha256(data.encode())
         return resultado.hexdigest()
 
-    def add_block(self, orden_id, nombre, cantidad, stock, fecha, cliente):
+    def add_block(self, orden_id, nombre, cantidad, stock, fecha, cliente, cadena):
         prev_hash = self.chain[-1].hash
         data = f"{orden_id}{nombre}{cantidad}{stock}{fecha},{cliente}"
         hash = self.hashGenerator(data + prev_hash)
-        block = Bloque(orden_id, nombre, cantidad, stock, fecha, cliente, hash, prev_hash)
+        block = Bloque(orden_id, nombre, cantidad, stock, fecha, cliente, hash, prev_hash, cadena)
         self.chain.append(block)
         
         # Guardar en la base de datos
@@ -49,24 +49,11 @@ class MiBlock:
             fecha = fecha,
             cliente = cliente,
             hash=hash,
-            prev_hash=prev_hash
+            prev_hash=prev_hash,
+            cadena=cadena
         )
 
 blch = MiBlock()
-
-""" @csrf_exempt
-def add_block(request):
-    if request.method == 'POST':
-        data = request.POST
-        orden_id = data['ordenes_id']
-        nombre = data['nombre']
-        cantidad = data['cantidad']
-        stock = data['stock']
-        fecha = data['fecha']  # Usa la fecha proporcionada o la fecha actual
-        cliente = data['cliente']
-        blch.add_block(orden_id, nombre, cantidad, stock, fecha, cliente)
-        return JsonResponse({'message': 'Block added successfully', 'block': blch.chain[-1].__dict__}, status=200)
- """
 
 @csrf_exempt
 def get_chain(request):
@@ -105,19 +92,27 @@ def orden(request):
             stock = form.cleaned_data['stock']
             fecha = form.cleaned_data.get('fecha', timezone.now())
             cliente = form.cleaned_data['cliente']
-
+            
+            # Aquí decides cómo seleccionar o crear una cadena
+            cadena_nombre = f"Cadena de {nombre}"  # Usa el nombre del producto o cualquier lógica que prefieras
+            cadena, created = Cadena.objects.get_or_create(
+                nombre=cadena_nombre,
+                defaults={'descripcion': 'Descripción por defecto'}
+            )
+            
             # Crea un nuevo bloque en la blockchain
             mi_block = MiBlock()
-            mi_block.add_block(orden_id, nombre, cantidad, stock, fecha, cliente)
-            order_id = form.cleaned_data.get('orden_id')
-            messages.success(request, f'Orden Blockchain {order_id} ha sido añadido con exito')
-            # Redirige o muestra un mensaje de éxito
+            mi_block.add_block(orden_id, nombre, cantidad, stock, fecha, cliente, cadena)
+            
+            messages.success(request, f'Orden Blockchain {orden_id} ha sido añadida con éxito a la cadena {cadena.nombre}')
             return redirect('blockchain-orden')
     else:
         form = OrderForm()
 
     context = {
         'form': form,
+        # Puedes pasar opciones para que el usuario elija una cadena si es necesario
+        'cadenas': Cadena.objects.all()
     }
     return render(request, "blockchain/orden.html", context)
 
@@ -127,6 +122,7 @@ def blockchain_dashboard(request):
 
 def lista_bloques(request):
     blocks = Block.objects.all()
+    cadenas = Cadena.objects.all()  # Obtén todas las cadenas
 
     if request.method == 'POST':
         cadena_nombre = request.POST.get('nombre')
@@ -135,11 +131,20 @@ def lista_bloques(request):
         # Crea una nueva cadena si el nombre y descripción son proporcionados
         if cadena_nombre:
             nueva_cadena = Cadena.objects.create(nombre=cadena_nombre, descripcion=cadena_descripcion)
-            # Puedes agregar lógica adicional si quieres que los bloques existentes se asocien a esta nueva cadena
+            # Lógica adicional si deseas asociar bloques existentes a esta nueva cadena
+            # Ejemplo: asociar todos los bloques actuales a la nueva cadena
+            for block in blocks:
+                block.cadena = nueva_cadena
+                block.save()
 
         return redirect('blockchain-bloques')  # Redirigir a la misma vista después de crear la cadena
 
-    return render(request, 'blockchain/bloques.html', {'blocks': blocks})
+    context = {
+        'blocks': blocks,
+        'cadenas': cadenas
+    }
+
+    return render(request, 'blockchain/bloques.html', context)
 
 def crear_cadena(request, nombre):
     print(f"Recibiendo ID de bloque: {nombre}")
@@ -173,7 +178,7 @@ def segundo_bloque(request, pk):
         return HttpResponse("No se encontró el primer bloque", status=404)
     
     if request.method == 'POST':
-        form = OrderForm(request.POST, instance=primer_bloque)
+        form = OrderForm2(request.POST, instance=primer_bloque)
         if form.is_valid():
             # Mantén el nombre de la orden del primer bloque
             nombre = primer_bloque.nombre
@@ -182,6 +187,13 @@ def segundo_bloque(request, pk):
             cantidad = form.cleaned_data['cantidad']
             stock = form.cleaned_data['stock']
             cliente = form.cleaned_data['cliente']
+            cadena = primer_bloque.cadena
+
+            if not cadena:
+                # Si la cadena no existe, crea una nueva
+                cadena = Cadena.objects.create(nombre=f"Cadena de {nombre}", descripcion="Descripción de la cadena")
+                primer_bloque.cadena = cadena
+                primer_bloque.save()
 
             # Crear el segundo bloque con el hash del primer bloque como prev_hash
             mi_block = MiBlock()
@@ -191,6 +203,7 @@ def segundo_bloque(request, pk):
             
             # Guardar ambos bloques en la cadena
             Block.objects.create(
+                cadena=cadena,
                 orden_id=pk,
                 nombre=nombre,
                 cantidad=cantidad,
@@ -203,6 +216,11 @@ def segundo_bloque(request, pk):
             
             return redirect('blockchain-bloques')
     else:
-        form = OrderForm(instance=primer_bloque)
+        form = OrderForm2(instance=primer_bloque)
 
     return render(request, 'blockchain/segundo_bloque.html', {'form': form})
+
+def ver_cadena(request, cadena_id):
+    cadena = get_object_or_404(Cadena, id=cadena_id)
+    bloques = cadena.bloques.all()  # Obtén todos los bloques de la cadena
+    return render(request, 'blockchain/bloques.html', {'cadena': cadena, 'bloques': bloques})

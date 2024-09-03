@@ -10,6 +10,7 @@ class Cadena(models.Model):
         return self.nombre
 
 class Block(models.Model):
+    cadena = models.ForeignKey(Cadena, on_delete=models.CASCADE, related_name='bloques', null=True, blank=True)
     orden_id  = models.CharField(max_length=100)
     nombre = models.ForeignKey(Product, on_delete=models.CASCADE)
     cantidad = models.IntegerField()
