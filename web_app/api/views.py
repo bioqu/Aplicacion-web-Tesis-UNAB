@@ -2,10 +2,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
 from .models import Product, Order
 from django.contrib.auth.decorators import login_required
-from .forms import ProductForm, OrderForm
+from .forms import ProductForm, OrderForm, OrderUpdateForm, PDFUploadForm
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .forms import PDFUploadForm
 from django.http import JsonResponse
 
 
@@ -148,35 +147,41 @@ def product_update(request, pk):
 
 @login_required(login_url='user-login')
 def ordenes(request):
-    # crear un "web" de entrada para ordenes
-    orders = Order.objects.all()
+    # Inicializar el filtro
+    if 'filter' in request.GET:
+        filter_type = request.GET['filter']
+        if filter_type == 'completadas':
+            orders = Order.objects.completadas()
+        elif filter_type == 'no_completadas':
+            orders = Order.objects.no_completadas()
+        else:
+            orders = Order.objects.all()
+    else:
+        orders = Order.objects.all()
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    # Contador de objetos (productos, ordenes y staff o usuario)
     workers_count = User.objects.all().count()
     orders_count = orders.count()
     item_count = Product.objects.all().count()
 
-
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
-            form.save()
             instance = form.save(commit=False)
             instance.staff = request.user
             instance.save()
             order_name = form.cleaned_data.get('product').name
             messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
             return redirect("api-ordenes")
-                         
     else:
         form = OrderForm()
 
-    context={
-        'orders':orders,
-        'form':form,
-        'workers_count':workers_count,
+    context = {
+        'orders': orders,
+        'form': form,
+        'workers_count': workers_count,
         'orders_count': orders_count,
-        'item_count':item_count,
+        'item_count': item_count,
     }
     return render(request, "dashboard/ordenes.html", context)
 
@@ -215,18 +220,24 @@ def order_detail(request, pk):
 def order_edit(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
+    # Obtener todas las órdenes completadas
+    ordenes_completadas = Order.objects.completadas()
+
+    # Obtener todas las órdenes no completadas
+    ordenes_no_completadas = Order.objects.no_completadas()
+
     #Contador de objetos (productos, ordenes y staff o usuario)
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
 
     if request.method == 'POST':
-        form = OrderForm(request.POST, instance=order)
+        form = OrderUpdateForm(request.POST, instance=order)
         if form.is_valid():
             form.save()
-            return redirect('api-ordenes', pk=order.pk)
+            return redirect('api-ordenes')
     else:
-        form = OrderForm(instance=order)
+        form = OrderUpdateForm(instance=order)
 
     context = {
         'form': form,
@@ -234,6 +245,8 @@ def order_edit(request, pk):
         'workers_count':workers_count,
         'orders_count': orders_count,
         'item_count':item_count,
+        'ordenes_completadas':ordenes_completadas,
+        'ordenes_no_completadas':ordenes_no_completadas,
         
     }
     return render(request, "dashboard/ordenes_edit.html", context)

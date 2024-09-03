@@ -49,6 +49,21 @@
     
 </div>
     <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-info text-white">Filtro de Ordenes</div>
+            <div class="card-body">
+        <form method="GET" action="{% url 'api-ordenes' %}">
+            <label for="filter">Filtrar ordenes por:</label>
+            <select name="filter" id="filter">
+                <option value="">Todas</option>
+                <option value="completadas" {% if request.GET.filter == 'completadas' %}selected{% endif %}>Completadas</option>
+                <option value="no_completadas" {% if request.GET.filter == 'no_completadas' %}selected{% endif %}>No Completadas</option>
+            </select>
+            <button type="submit">Filtrar</button>
+        </form>
+    </div>
+</div>
+<br>
         <table class="table bg-white">
             <thead class="bg-info text-white">
                 <tr>
@@ -74,15 +89,10 @@
                         <a class="btn btn-info btn-sm bg-dark"
                            href="{% url 'api-ordenes-edit' orders.id %}">Editar</a>
                     </td>
-                    {% comment %} <td><a class="btn btn-info btn-sm mr-2"
-                        href="{% url 'api-ordenes-detail' orders.id %}">Ver</a>
-                        <a class="btn btn-info btn-sm bg-dark" 
-                        href="{% url 'api-ordenes-edit' orders.id %}">Editar</a></td> {% endcomment %}
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
-</div>
-</div>
+
 {% endblock %}

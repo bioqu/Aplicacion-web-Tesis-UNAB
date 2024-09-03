@@ -16,11 +16,33 @@ class Product(models.Model):
     def __str__(self):
         return f'{self.name}-{self.quantity}'
 
+#crear queryset para filtraar ordenes completadas
+class OrderQuerySet(models.QuerySet):
+    def completadas(self):
+        return self.filter(completado=True)
+
+    def no_completadas(self):
+        return self.filter(completado=False)
+
+#manager para sobreescribir queryset
+class OrderManager(models.Manager):
+    def get_queryset(self):
+        return OrderQuerySet(self.model, using=self._db)
+
+    def completadas(self):
+        return self.get_queryset().completadas()
+
+    def no_completadas(self):
+        return self.get_queryset().no_completadas()
+
 class Order(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE, null=True)
     staff = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     order_quantity = models.PositiveIntegerField(null=True)
     date = models.DateTimeField(auto_now_add= True)
+    completado = models.BooleanField(default=False)
+
+    objects = OrderManager()  #se asigna el manager personalizado
 
     def __str__(self):
         return f'{self.product}-{self.order_quantity} ordered by {self.staff}'

@@ -44,6 +44,11 @@ class OrderForm(forms.ModelForm):
         elif self.instance.pk:
             self.fields['quantity_available'].initial = self.instance.product.quantity  # Aquí también se asigna quantity a quantity_available
 
+class OrderUpdateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['product', 'staff', 'order_quantity', 'completado']  # Incluye 'completado' para la edición
+
 class PDFUploadForm(forms.ModelForm):
     class Meta:
         model = PDF
