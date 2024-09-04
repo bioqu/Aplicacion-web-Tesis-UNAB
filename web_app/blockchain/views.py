@@ -67,16 +67,9 @@ def consulta(request):
 
     # Obtener solo los IDs únicos de los bloques
     all_ids = Block.objects.values_list('orden_id', flat=True).distinct()
-    print(f"Todos los IDs: {all_ids}")  # Agrega esta línea para depurar
 
     # Filtrar los bloques por ID si se ha seleccionado uno
-    orden_id = request.GET.get('orden_id')
-    if orden_id:
-        blocks = Block.objects.filter(orden_id=orden_id)
-    else:
-        blocks = Block.objects.all()
-
-    print(f"Blocks: {blocks}")  # Agrega esta línea para depurar
+    blocks = Block.objects.all()
 
     context = {
         'all_ids': all_ids,
@@ -111,10 +104,21 @@ def orden(request):
             )
             
             # Crea un nuevo bloque en la blockchain
+            instance = form.save(commit=False)
+            instance.cadena = cadena  # Asocia la cadena antes de crear el bloque
             mi_block = MiBlock()
             mi_block.add_block(orden_id, nombre, cantidad, stock, fecha, cliente, cadena)
             
-            messages.success(request, f'Orden Blockchain {orden_id} ha sido añadida con éxito a la cadena {cadena.nombre}')
+            # Actualizar el stock del producto
+            product = instance.nombre
+            product.quantity -= instance.cantidad
+            product.save()
+            
+            # Comprobar si el stock se agotó y tomar acción si es necesario
+            if product.quantity <= 0:
+                messages.warning(request, f'El producto {product.name} ha agotado su stock.')
+            
+            messages.success(request, f'Orden Blockchain {instance.orden_id} ha sido añadida con éxito a la cadena {instance.cadena.nombre}')
             return redirect('blockchain-orden')
     else:
         form = OrderForm()
@@ -122,10 +126,11 @@ def orden(request):
     context = {
         'form': form,
         'cadenas': Cadena.objects.all(),
-        'block_count':block_count,
-        'cadena_count':cadena_count,
+        'block_count': block_count,
+        'cadena_count': cadena_count,
     }
     return render(request, "blockchain/orden.html", context)
+
 
 
 # blockchain/views.py
@@ -285,7 +290,6 @@ def segundo_bloque(request, pk):
 
     return render(request, 'blockchain/segundo_bloque.html', {'form': form, 'bloques_incompletos': bloques_incompletos, 'block_count':block_count, 'cadena_count':cadena_count,})
 
-
 def ver_cadena(request, cadena_id):
     #Contador de objetos (bloques y cadenas)
     block_count = Block.objects.all().count()
@@ -294,9 +298,20 @@ def ver_cadena(request, cadena_id):
     bloques = cadena.bloques.all()  # Obtén todos los bloques de la cadena
     return render(request, 'blockchain/bloques.html', {'cadena': cadena, 'bloques': bloques, 'block_count':block_count, 'cadena_count':cadena_count,})
 
-def get_product_quantity(request, product_name):
-    try:
-        product = Product.objects.get(name=product_name)
-        return JsonResponse({'quantity': product.quantity})
-    except Product.DoesNotExist:
-        return JsonResponse({'error': 'Producto no encontrado'}, status=404)
+def get_product_quantity(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    return JsonResponse({'quantity': product.quantity})
+
+
+def block_detalle(request, pk):
+    blocks = get_object_or_404(Block, pk=pk)
+    #Contador de objetos (bloques y cadenas)
+    block_count = Block.objects.all().count()
+    cadena_count = Cadena.objects.all().count()
+
+    context = {
+        'blocks': blocks,
+        'block_count':block_count,
+        'cadena_count':cadena_count,
+    }
+    return render(request, 'blockchain/block_detalle.html', context)

@@ -1,0 +1,35 @@
+{% extends 'partials/base.html' %}
+{% block title %}Detalle Blockchain{% endblock %}
+{% block content %}
+{% include 'blockchain/top_nav_block.html' %}
+
+<div class="container mt-4">
+    <div class="block-container">
+        <table class="table bg-white table-fixed">
+            <thead class="bg-info text-white">
+                <tr>
+                    <th>ID de la Orden:</th> 
+                    <th>Nombre del Producto:</th>
+                    <th>Cantidad:</th>
+                    <th>Cliente:</th> 
+                    <th>Fecha:</th>
+                    <th>Hash:</th> 
+                    <th>Pre Hash:</th> 
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ blocks.orden_id }}</td>
+                    <td>{{ blocks.nombre }}</td>
+                    <td>{{ blocks.cantidad }}</td>
+                    <td>{{ blocks.cliente }}</td>
+                    <td>{{ blocks.fecha | date:"d M Y, H:i" }}</td>
+                    <td>{{ blocks.hash|truncatechars:20 }}</td>
+                    <td>{{ blocks.prev_hash|truncatechars:20 }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</div>
+{% endblock%}

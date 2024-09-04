@@ -8,5 +8,6 @@ urlpatterns = [
     path("ordenes/", views.orden, name="blockchain-orden"),
     path('bloques/', views.lista_bloques, name='blockchain-bloques'),
     path("bloques/segundo_bloque/<int:pk>/", views.segundo_bloque, name='blockchain-cadena'), 
-    path('get_product_quantity/<str:product_name>/', views.get_product_quantity, name='get_product_quantity'),
+    path('get_product_quantity/<int:product_id>/', views.get_product_quantity, name='get_product_quantity'),
+    path('consulta/detalle/<int:pk>/', views.block_detalle, name='blockchain-detalle'),
 ]

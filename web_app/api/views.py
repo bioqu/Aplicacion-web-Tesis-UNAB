@@ -16,10 +16,12 @@ def index(request):
     orders = Order.objects.all()
     products = Product.objects.all()
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos ebanda info (productos, ordenes y staff o usuario)
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
+
 
     if request.method == "POST":
         form = OrderForm(request.POST)
@@ -38,6 +40,7 @@ def index(request):
         'workers_count':workers_count,
         'orders_count':orders_count,
         'item_count':item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
     }
     return render(request, "dashboard/index.html", context)
 
@@ -47,9 +50,10 @@ def staff(request):
     workers = User.objects.all()
     workers_count = workers.count()
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos ebanda info (productos, ordenes y staff o usuario)
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
 
     context={
@@ -57,22 +61,25 @@ def staff(request):
         'workers_count':workers_count,
         'orders_count':orders_count,
         'item_count':item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
     }
     return render(request, "dashboard/staff.html", context)
 
 @login_required(login_url='user-login')
 def staff_detail(request, pk):
     workers = User.objects.get(id=pk)
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario) &banda info
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
     workers_count = User.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
     context={
         'workers':workers,
         'workers_count':workers_count,
         'orders_count':orders_count,
         'item_count':item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
     }
     return render(request, "dashboard/staff_detail.html", context)
 
@@ -82,10 +89,11 @@ def productos(request):
     items = Product.objects.all() #usando ORM 
     #items = Product.objects.raw('SELECT * FROM api_product')
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario) &banda info
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = items.count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
 
     CATEGORY_TRANSLATIONS = {
@@ -117,6 +125,7 @@ def productos(request):
         'workers_count':workers_count,
         'orders_count':orders_count,
         'item_count':item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
     }
     return render(request, "dashboard/productos.html", context)
 
@@ -147,7 +156,7 @@ def product_update(request, pk):
 
 @login_required(login_url='user-login')
 def ordenes(request):
-    # Inicializar el filtro
+    # Inicializar el filtro de ordenes completada
     if 'filter' in request.GET:
         filter_type = request.GET['filter']
         if filter_type == 'completadas':
@@ -158,21 +167,36 @@ def ordenes(request):
             orders = Order.objects.all()
     else:
         orders = Order.objects.all()
-
-    # Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario) &banda info
     workers_count = User.objects.all().count()
     orders_count = orders.count()
     item_count = Product.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.staff = request.user
-            instance.save()
-            order_name = form.cleaned_data.get('product').name
-            messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
-            return redirect("api-ordenes")
+            product = instance.product
+            order_quantity = instance.order_quantity
+
+            if product.quantity >= order_quantity:
+                # Actualizar el stock del producto
+                product.quantity -= order_quantity
+                product.save()
+
+                # Guardar la orden
+                instance.staff = request.user
+                instance.save()
+
+                # Mensaje de orden creada con exito
+                order_name = form.cleaned_data.get('product').name
+                messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
+                return redirect("api-ordenes")
+            else:
+                # Mensaje de error si el stock es insuficiente
+                messages.error(request, f'Stock insuficiente para el producto {product.name}. Quedan {product.quantity} unidades.')
+
     else:
         form = OrderForm()
 
@@ -182,17 +206,20 @@ def ordenes(request):
         'workers_count': workers_count,
         'orders_count': orders_count,
         'item_count': item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
     }
     return render(request, "dashboard/ordenes.html", context)
+
 
 @login_required(login_url='user-login')
 def order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario) & banda inof
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
 
     if request.method == 'POST':
@@ -211,6 +238,7 @@ def order_detail(request, pk):
         'workers_count':workers_count,
         'orders_count': orders_count,
         'item_count':item_count,
+        'productos_con_stock_cero': productos_con_stock_cero,
         
     }
     return render(request, "dashboard/ordenes_detail.html", context)
@@ -226,10 +254,11 @@ def order_edit(request, pk):
     # Obtener todas las órdenes no completadas
     ordenes_no_completadas = Order.objects.no_completadas()
 
-    #Contador de objetos (productos, ordenes y staff o usuario)
+    #Contador de objetos (productos, ordenes y staff o usuario) & banda info
     workers_count = User.objects.all().count()
     orders_count = Order.objects.all().count()
     item_count = Product.objects.all().count()
+    productos_con_stock_cero = Product.objects.filter(quantity=0)
 
     if request.method == 'POST':
         form = OrderUpdateForm(request.POST, instance=order)
@@ -247,6 +276,7 @@ def order_edit(request, pk):
         'item_count':item_count,
         'ordenes_completadas':ordenes_completadas,
         'ordenes_no_completadas':ordenes_no_completadas,
+        'productos_con_stock_cero': productos_con_stock_cero,
         
     }
     return render(request, "dashboard/ordenes_edit.html", context)

@@ -5,11 +5,18 @@
                 <div class="card-header bg-primary text-white">
                     Informacion
                 </div>
-                <div class="card-body">
+                <div class="card-body" style="width: 18rem;">
                     <marquee behavior="" direction="">
-                        <h3 class="my-4">Comenzamos...</h3>
-                    </marquee>
-                </div>
+                    {% if productos_con_stock_cero %}
+                        
+                        {% for producto in productos_con_stock_cero %}
+                        <h3 class="my-4">{{ producto.name }} Stock: {{ producto.quantity }}</h3>
+                        {% endfor %}
+                    {% else %}
+                            <h3 class="my-4">No hay productos con stock 0</h3>
+            {% endif %}
+        </marquee>
+        </div>
             </div>
         </div>
         <div class="col-md-8 mt-4">

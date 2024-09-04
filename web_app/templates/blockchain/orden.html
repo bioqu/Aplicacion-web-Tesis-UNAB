@@ -25,15 +25,15 @@
                 </form>
                 <script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        const productSelect = document.getElementById('id_product');
-                        const quantityAvailableInput = document.getElementById('id_quantity_available');
+                        const productSelect = document.getElementById('id_nombre');  // Cambiado a 'id_nombre'
+                        const quantityAvailableInput = document.getElementById('id_stock');  // Cambiado a 'id_stock'
                     
                         productSelect.addEventListener('change', function() {
                             const productId = productSelect.value;
                             fetch(`/get_product_quantity/${productId}/`)
                                 .then(response => response.json())
                                 .then(data => {
-                                    quantityAvailableInput.value = data.quantity_available;
+                                    quantityAvailableInput.value = data.quantity;
                                 });
                         });
                     });

@@ -13,7 +13,7 @@ class ProductForm(forms.ModelForm):
 
 class OrderForm(forms.ModelForm):
     product = forms.ModelChoiceField(
-        queryset=Product.objects.all(),
+        queryset=Product.objects.filter(quantity__gt=0),  # Filtrar productos con stock mayor a 0
         label='Nombre del Producto',
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -34,15 +34,20 @@ class OrderForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(OrderForm, self).__init__(*args, **kwargs)
+        
+        # Filtrar productos con stock mayor a 0
+        self.fields['product'].queryset = Product.objects.filter(quantity__gt=0)
+        
+        # Mostrar la cantidad disponible cuando se selecciona un producto
         if 'product' in self.data:
             try:
                 product_id = int(self.data.get('product'))
                 product = Product.objects.get(id=product_id)
-                self.fields['quantity_available'].initial = product.quantity  # Aquí se asigna quantity a quantity_available
+                self.fields['quantity_available'].initial = product.quantity  # Asignar cantidad disponible
             except (ValueError, TypeError, Product.DoesNotExist):
                 pass  # Si no existe el producto, dejar el campo vacío
         elif self.instance.pk:
-            self.fields['quantity_available'].initial = self.instance.product.quantity  # Aquí también se asigna quantity a quantity_available
+            self.fields['quantity_available'].initial = self.instance.product.quantity  # Asignar cantidad disponible en la edición
 
 class OrderUpdateForm(forms.ModelForm):
     class Meta:
@@ -53,3 +58,8 @@ class PDFUploadForm(forms.ModelForm):
     class Meta:
         model = PDF
         fields = ['file']  # Suponiendo que el modelo PDF tiene un campo 'file' para almacenar el PDF
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtrar productos con stock mayor a 0
+        self.fields['product'].queryset = Product.objects.filter(quantity__gt=0)

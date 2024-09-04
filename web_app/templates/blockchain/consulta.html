@@ -4,17 +4,6 @@
 {% include 'blockchain/top_nav_block.html' %}
     
     <div class="container mt-4">
-        <div class="card">
-            <div class="card-header bg-info text-white">Blockchain</div>
-            <div class="card-body">
-            <form method="get" action="{% url 'blockchain-consulta' %}">
-                <label for="order_id">Buscar por ID de la Orden:</label>
-                <input type="text" id="order_id" name="order_id" placeholder="Ingresa el ID de la orden">
-                <button type="submit">Buscar</button>
-            </form>
-        </div>
-    </div>
-    <br>
             <div class="block-container">
                 {% if blocks %}
                     <table class="table bg-white">
@@ -26,6 +15,7 @@
                                 <th>Stock</th>
                                 <th>Fecha</th>
                                 <th>Cliente</th>
+                                <th>Acción</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,6 +27,8 @@
                                     <td>{{ block.stock }}</td>
                                     <td>{{ block.fecha }}</td>
                                     <td>{{ block.cliente }}</td>
+                                    <td>
+                                        <a class="btn btn-info btn-sm mr-2" href="{% url 'blockchain-detalle' block.pk %}">Ver</a></td>
                                 </tr>
                             {% endfor %}
                         </tbody>
@@ -45,22 +37,7 @@
                     <p>No se encontraron bloques para el ID de orden proporcionado.</p>
                 {% endif %}
             </div>
-       {% comment %} 
-            <div class="block-container">
-                {% for block in blocks %}
-                <div class="block">
-                    <p>ID: {{ block.orden_id }}</p>
-                    <p>Nombre: {{ block.nombre }}</p>
-                    <p>Cantidad: {{ block.cantidad }}</p>
-                    <p>Stock: {{ block.stock }}</p>
-                    <p>Fecha: {{ block.fecha }}</p>
-                    <p>cliente: {{ block.cliente }}</p>
-                    <p>Hash: {{ block.hash }}</p>
-                    <p>Prev Hash: {{ block.prev_hash }}</p>
-                </div>
-                {% endfor %} {% endcomment %}
             </div>
         </div>
     </div>
 {% endblock%}
-
