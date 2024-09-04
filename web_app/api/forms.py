@@ -61,5 +61,3 @@ class PDFUploadForm(forms.ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Filtrar productos con stock mayor a 0
-        self.fields['product'].queryset = Product.objects.filter(quantity__gt=0)

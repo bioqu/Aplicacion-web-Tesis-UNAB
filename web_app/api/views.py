@@ -22,14 +22,40 @@ def index(request):
     item_count = Product.objects.all().count()
     productos_con_stock_cero = Product.objects.filter(quantity=0)
 
+    CATEGORY_TRANSLATIONS = {
+    'Food': 'Alimentos',
+    'Electronics': 'Electrónica',
+    'Stationary': 'Papelería',
+    }
+    
+    # Traducir las categorías
+    for products in products:
+        products.category = CATEGORY_TRANSLATIONS.get(products.category, products.category)
+
 
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
             instance = form.save(commit=False)
-            instance.staff = request.user
-            instance.save()
-            return redirect("api-index")
+            product = instance.product
+            order_quantity = instance.order_quantity
+
+            if product.quantity >= order_quantity:
+                # Actualizar el stock del producto
+                product.quantity -= order_quantity
+                product.save()
+
+                # Guardar la orden
+                instance.staff = request.user
+                instance.save()
+
+                # Mensaje de orden creada con exito
+                order_name = form.cleaned_data.get('product').name
+                messages.success(request, f'La orden {order_name} ha sido añadida con éxito')
+                return redirect("api-index")
+            else:
+                # Mensaje de error si el stock es insuficiente
+                messages.error(request, f'Stock insuficiente para el producto {product.name}. Quedan {product.quantity} unidades.')
     else:
         form = OrderForm()
 
@@ -101,7 +127,6 @@ def productos(request):
     'Electronics': 'Electrónica',
     'Stationary': 'Papelería',
     }
-
     
 
     # Traducir las categorías
@@ -298,6 +323,7 @@ def staff_order_detail(request, pk):
     context = {
         'order': order,
         'form': form,
+        'product': order.product, 
         
     }
     return render(request, "dashboard/staff_ordenes_detail.html", context)
