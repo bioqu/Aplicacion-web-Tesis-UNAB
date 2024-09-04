@@ -194,6 +194,7 @@ def ordenes(request):
             orders = Order.objects.all()
     else:
         orders = Order.objects.all()
+        
     #Contador de objetos (productos, ordenes y staff o usuario) &banda info
     workers_count = User.objects.all().count()
     orders_count = orders.count()
