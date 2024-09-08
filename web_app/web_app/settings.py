@@ -53,6 +53,12 @@ INSTALLED_APPS = [
     #"ganache_blockchain"
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+}
+
 #para solucionar crispy_template error
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
