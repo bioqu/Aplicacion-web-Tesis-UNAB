@@ -2,17 +2,20 @@ from django.db import models
 from django.contrib.auth.models import User # type: ignore
 
 # Create your models here.
-CATEGORY = (
+class Product(models.Model):
+    CATEGORY = (
     ('Stationary', 'Papelería'),
     ('Electronics', 'Electrónica'),
     ('Food', 'Alimentos'),
 )
-
-class Product(models.Model):
     name = models.CharField(max_length=100, null=True)
     quantity = models.PositiveIntegerField(null=True)
     category = models.CharField(max_length=50, choices=CATEGORY, null=True)
-
+    
+    @property
+    def category_display(self):
+        return dict(self.CATEGORY).get(self.category, self.category)
+    
     def __str__(self):
         return f'{self.name}-{self.quantity}'
 

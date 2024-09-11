@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from .forms import ProductForm, OrderForm, OrderUpdateForm, PDFUploadForm
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.auth import logout
 from django.http import JsonResponse
 
 
@@ -12,6 +13,11 @@ from django.http import JsonResponse
 # Create your views here.
 @login_required(login_url='user-login')
 def index(request):
+    if not request.user.is_staff and not request.user.is_superuser:
+        messages.warning(request, 'No tienes los permisos necesarios para acceder a esta página.')
+        logout(request)  # Desloguea al usuario
+        return redirect('user-login')  # Redirige a la página de login 
+    
     # funcion para crear un "web" de entrada index
     orders = Order.objects.all()
     products = Product.objects.all()
@@ -286,24 +292,58 @@ def order_detail(request, pk):
 
 @login_required(login_url='user-login')
 def order_edit(request, pk):
+
+    CATEGORY_TRANSLATIONS = {
+    'Food': 'Alimentos',
+    'Electronics': 'Electrónica',
+    'Stationary': 'Papelería',
+    }
+    
+    items = Product.objects.all()
+    # Traducir las categorías
+    for items in items:
+        items.category = CATEGORY_TRANSLATIONS.get(items.category, items.category)
+    
     order = get_object_or_404(Order, pk=pk)
+    original_quantity = order.order_quantity
+    product = order.product
 
     # Obtener todas las órdenes completadas
-    ordenes_completadas = Order.objects.completadas()
+    ordenes_completadas = Order.objects.filter(completado=True)
 
     # Obtener todas las órdenes no completadas
-    ordenes_no_completadas = Order.objects.no_completadas()
+    ordenes_no_completadas = Order.objects.filter(completado=False)
 
-    #Contador de objetos (productos, ordenes y staff o usuario) & banda info
-    workers_count = User.objects.all().count()
-    orders_count = Order.objects.all().count()
-    item_count = Product.objects.all().count()
+    # Contador de objetos (productos, órdenes y staff o usuario) & banda info
+    workers_count = User.objects.count()
+    orders_count = Order.objects.count()
+    item_count = Product.objects.count()
     productos_con_stock_cero = Product.objects.filter(quantity=0)
 
     if request.method == 'POST':
         form = OrderUpdateForm(request.POST, instance=order)
         if form.is_valid():
-            form.save()
+            updated_order = form.save(commit=False)
+            new_quantity = updated_order.order_quantity
+
+            if new_quantity > original_quantity:
+                # Si la nueva cantidad es mayor, comprobar el stock disponible
+                difference = new_quantity - original_quantity
+                if product.quantity < difference:
+                    messages.error(request, f'Stock insuficiente para el producto {product.name}. Quedan {product.quantity} unidades.')
+                    return redirect('api-ordenes-edit', pk=order.pk)
+                # Ajustar el stock del producto
+                product.quantity -= difference
+            else:
+                # Si la nueva cantidad es menor, reponer el stock
+                difference = original_quantity - new_quantity
+                product.quantity += difference
+
+            product.save()
+            updated_order.save()
+
+            # Mensaje de éxito
+            messages.success(request, f'La orden {product.name} ha sido actualizada con éxito')
             return redirect('api-ordenes')
     else:
         form = OrderUpdateForm(instance=order)
@@ -317,6 +357,7 @@ def order_edit(request, pk):
         'ordenes_completadas':ordenes_completadas,
         'ordenes_no_completadas':ordenes_no_completadas,
         'productos_con_stock_cero': productos_con_stock_cero,
+        'items':items,
         
     }
     return render(request, "dashboard/ordenes_edit.html", context)
@@ -324,6 +365,17 @@ def order_edit(request, pk):
 @login_required(login_url='user-login')
 def staff_order_detail(request, pk):
     order = get_object_or_404(Order, pk=pk)
+
+    CATEGORY_TRANSLATIONS = {
+    'Food': 'Alimentos',
+    'Electronics': 'Electrónica',
+    'Stationary': 'Papelería',
+    }
+    
+    items = Product.objects.all()
+    # Traducir las categorías
+    for items in items:
+        items.category = CATEGORY_TRANSLATIONS.get(items.category, items.category)
 
     if request.method == 'POST':
         form = PDFUploadForm(request.POST, request.FILES)
@@ -338,7 +390,8 @@ def staff_order_detail(request, pk):
     context = {
         'order': order,
         'form': form,
-        'product': order.product, 
+        'product': order.product,
+        'items':items,
         
     }
     return render(request, "dashboard/staff_ordenes_detail.html", context)
@@ -347,19 +400,52 @@ def staff_order_detail(request, pk):
 @login_required(login_url='user-login')
 def staff_order_edit(request, pk):
     order = get_object_or_404(Order, pk=pk)
+    original_quantity = order.order_quantity
+    product = order.product
 
+    CATEGORY_TRANSLATIONS = {
+        'Food': 'Alimentos',
+        'Electronics': 'Electrónica',
+        'Stationary': 'Papelería',
+    }
+    
+    items = Product.objects.all()
+    # Traducir las categorías
+    for item in items:
+        item.category = CATEGORY_TRANSLATIONS.get(item.category, item.category)
 
     if request.method == 'POST':
         form = OrderForm(request.POST, instance=order)
         if form.is_valid():
-            form.save()
+            updated_order = form.save(commit=False)
+            new_quantity = updated_order.order_quantity
+
+            if new_quantity > original_quantity:
+                # Si la nueva cantidad es mayor, comprobar el stock disponible
+                difference = new_quantity - original_quantity
+                if product.quantity < difference:
+                    messages.error(request, f'Stock insuficiente para el producto {product.name}. Quedan {product.quantity} unidades.')
+                    return redirect('api-staff-order-edit', pk=order.pk)
+                # Ajustar el stock del producto
+                product.quantity -= difference
+            else:
+                # Si la nueva cantidad es menor, reponer el stock
+                difference = original_quantity - new_quantity
+                product.quantity += difference
+
+            product.save()
+            updated_order.save()
+
+            # Mensaje de éxito
+            messages.success(request, f'La orden {product.name} ha sido actualizada con éxito')
             return redirect('api-index')
     else:
         form = OrderForm(instance=order)
 
     context = {
         'form': form,
-        'order': order,        
+        'order': order,
+        'items': items,
     }
     return render(request, "dashboard/staff_ordenes_edit.html", context)
 
