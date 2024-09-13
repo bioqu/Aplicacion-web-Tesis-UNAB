@@ -1,5 +1,5 @@
 {% extends 'partials/base.html' %}
-{% block title %}Blockchain{% endblock %}
+{% block title %}Página de Bloques{% endblock %}
 {% block content %}
 {% include 'blockchain/top_nav_block.html' %}
     
@@ -12,7 +12,7 @@
                                 <th>ID</th>
                                 <th>Nombre</th>
                                 <th>Cantidad</th>
-                                <th>Stock</th>
+                                <th>Inventario</th>
                                 <th>Fecha</th>
                                 <th>Cliente</th>
                                 <th>Acción</th>
@@ -34,7 +34,7 @@
                         </tbody>
                     </table>
                 {% else %}
-                    <p>No hay blockchain creados todavía</p>
+                    <p>No hay bloques creados todavía</p>
                 {% endif %}
             </div>
             </div>

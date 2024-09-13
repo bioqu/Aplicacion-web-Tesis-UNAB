@@ -207,17 +207,6 @@ def ordenes(request):
     item_count = Product.objects.all().count()
     productos_con_stock_cero = Product.objects.filter(quantity=0)
 
-    CATEGORY_TRANSLATIONS = {
-    'Food': 'Alimentos',
-    'Electronics': 'Electrónica',
-    'Stationary': 'Papelería',
-    }
-
-    items = Product.objects.all()
-    # Traducir las categorías
-    for items in items:
-        items.category = CATEGORY_TRANSLATIONS.get(items.category, items.category)
-
     if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
@@ -252,7 +241,6 @@ def ordenes(request):
         'orders_count': orders_count,
         'item_count': item_count,
         'productos_con_stock_cero': productos_con_stock_cero,
-        'items':items,
     }
     return render(request, "dashboard/ordenes.html", context)
 

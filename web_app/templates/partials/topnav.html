@@ -3,17 +3,17 @@
         <div class="col-md-4 mt-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    Informacion
+                    Información
                 </div>
                 <div class="card-body" style="width: 18rem;">
                     <marquee behavior="" direction="">
                     {% if productos_con_stock_cero %}
                         
                         {% for producto in productos_con_stock_cero %}
-                        <h3 class="my-4">{{ producto.name }} Stock: {{ producto.quantity }}</h3>
+                        <h3 class="my-4">{{ producto.name }} con inventario {{ producto.quantity }}</h3>
                         {% endfor %}
                     {% else %}
-                            <h3 class="my-4">No hay productos con stock 0</h3>
+                            <h3 class="my-4">Todos los productos tienen existencias</h3>
             {% endif %}
         </marquee>
         </div>
@@ -22,7 +22,7 @@
         <div class="col-md-8 mt-4">
             <div class="card">
                 <div class="card-header bg-primary text-white">
-                    Estadisticas
+                    Estadísticas
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -30,7 +30,7 @@
                             <a class="text-decoration-none text-dark" href="{% url "api-staff" %}">
                                 <div class="card my-card shadow">
                                     <div class="card-body text-center">
-                                        <h4>Staff <i class="fas fa-users"></i></h4>
+                                        <h4>Usuarios<i class="fas fa-users"></i></h4>
                                         <h3>{{ workers_count }}</h3>
                                     </div>
                                 </div>
@@ -40,7 +40,7 @@
                             <a class="text-decoration-none text-dark" href="{% url "api-productos" %}">
                                 <div class="card my-card shadow">
                                     <div class="card-body text-center">
-                                        <h4>Productos <i class="fas fa-box"></i></h4>
+                                        <h4>Productos<i class="fas fa-box"></i></h4>
                                         <h3> {{ item_count }} </h3>
                                     </div>
                                 </div>
@@ -50,7 +50,7 @@
                             <a class="text-decoration-none text-dark" href="{% url "api-ordenes" %}">
                                 <div class="card my-card shadow">
                                     <div class="card-body text-center">
-                                        <h4>Ordenes <i class="fas fa-shipping-fast"></i></h4>
+                                        <h4>Órdenes<i class="fas fa-shipping-fast"></i></h4>
                                         <h3> {{ orders_count }} </h3>
                                     </div>
                                 </div>

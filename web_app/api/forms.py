@@ -1,5 +1,6 @@
 from django import forms
 from .models import Product, Order, PDF
+from django.db import models
 
 class ProductForm(forms.ModelForm):
     class Meta:
@@ -22,6 +23,7 @@ class OrderForm(forms.ModelForm):
         label='Cantidad Disponible',
         widget=forms.NumberInput(attrs={'class': 'form-control', 'readonly': 'readonly'})
     )
+    
 
     class Meta:
         model = Order
