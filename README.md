@@ -1,4 +1,5 @@
-# webappUNAB
+# Aplicacion-web-Tesis-UNAB
+
 Proyecto de tesis Ing. en informatica y computacion UNAB
 
 Para el desarrollo de la aplicacion web se uso python/django como framework.
